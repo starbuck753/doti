@@ -1,0 +1,7 @@
+:root { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #22251f; background: #f6f7f3; font-synthesis: none; }
+:root[data-theme="dark"] { color: #eef1ea; background: #181b18; --surface: #222622; --text: #eef1ea; --muted: #aab2a7; --border: #3b443b; --accent: #a8d96b; --accent-soft: #2d4127; }
+:root[data-theme="light"] { --surface: #ffffff; --text: #22251f; --muted: #737b70; --border: #dfe5da; --accent: #527d2d; --accent-soft: #eaf3df; }
+* { box-sizing: border-box; }
+html { min-width: 320px; background: var(--surface); }
+body { margin: 0; min-width: 320px; min-height: 100vh; background: var(--surface); color: var(--text); }
+button { font: inherit; }
