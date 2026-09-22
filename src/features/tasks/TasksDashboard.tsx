@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAppSettings } from '../../app/providers/AppSettingsProvider'
 import type { PriorityLevel, Task, TaskBucket } from '../../domain/models'
@@ -8,13 +9,16 @@ import { useTasks } from './useTasks'
 const priorityColors = { 1: 'priority-green', 2: 'priority-yellow', 3: 'priority-orange', 4: 'priority-red' } as const
 
 function TaskRow({ task, onComplete, onRestore, onPriority }: { key?: string; task: Task; onComplete: () => void; onRestore: () => void; onPriority: (priority: PriorityLevel) => void }) {
+  const { t } = useTranslation()
+  const navigate = useNavigate()
   const { priorityAgingEnabled, priorityAgingIntervalDays } = useAppSettings()
   const priority = getEffectivePriority(task, { priorityAgingEnabled, priorityAgingIntervalDays })
   const cyclePriority = () => onPriority((priority % 4 + 1) as PriorityLevel)
-  return <div className={`task-row ${task.status === 'completed' ? 'completed' : ''}`}>
-    <button className="task-check" aria-label={task.status === 'completed' ? 'Restore task' : 'Complete task'} onClick={task.status === 'completed' ? onRestore : onComplete}>{task.status === 'completed' ? '✓' : '○'}</button>
+  return <div className={`task-row ${task.status === 'completed' ? 'completed' : ''}`} role="button" tabIndex={0} onClick={() => navigate(`/tasks/${task.id}`)} onKeyDown={(event: { key: string }) => { if (event.key === 'Enter') navigate(`/tasks/${task.id}`) }}>
+    <button className="task-check" aria-label={task.status === 'completed' ? t('taskDetail.restore') : t('taskDetail.complete')} onClick={(event: { stopPropagation: () => void }) => { event.stopPropagation(); (task.status === 'completed' ? onRestore : onComplete)() }}>{task.status === 'completed' ? '✓' : '○'}</button>
     <span className="task-title">{task.title}</span>
-    {task.status === 'active' && <button className={`priority-dot ${priorityColors[priority]}`} aria-label="Change priority" onClick={cyclePriority} />}
+    {task.description.trim() && <span className="details-indicator" aria-label={t('taskDetail.hasDescription')}>≡</span>}
+    {task.status === 'active' && <button className={`priority-dot ${priorityColors[priority]}`} aria-label={t('taskDetail.changePriority')} onClick={(event: { stopPropagation: () => void }) => { event.stopPropagation(); cyclePriority() }} />}
   </div>
 }
 

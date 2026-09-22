@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useAppSettings } from './providers/AppSettingsProvider'
 import { SettingsPage } from '../features/settings/SettingsPage'
 import { TasksDashboard } from '../features/tasks/TasksDashboard'
+import { TaskDetail } from '../features/tasks/TaskDetail'
 import './app.css'
 
 function Layout() {
@@ -31,7 +32,7 @@ export function App() {
       <Route element={<Layout />}>
         <Route path="/" element={<TasksDashboard />} />
         <Route path="/tasks" element={<TasksDashboard />} />
-        <Route path="/tasks/:taskId" element={<Placeholder title="Task Detail" />} />
+        <Route path="/tasks/:taskId" element={<TaskDetail />} />
         <Route path="/birthdays" element={<Placeholder title={t('navigation.birthdays')} />} />
         <Route path="/notes" element={<Placeholder title={t('navigation.notes')} />} />
         <Route path="/notes/:noteId" element={<Placeholder title="Note Detail" />} />
