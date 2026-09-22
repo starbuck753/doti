@@ -60,6 +60,15 @@ export class DotiDatabase extends Dexie {
     }).upgrade((transaction) => transaction.table('notes').toCollection().modify((note) => {
       note.deletedAt ??= null
     }))
+    this.version(5).stores({
+      tasks: 'id, status, bucket, priorityBase, dueDate, createdAt, updatedAt',
+      notes: 'id, createdAt, updatedAt, deletedAt',
+      birthdays: 'id, month, day, name, updatedAt',
+      taskNoteLinks: 'id, taskId, noteId, deletedAt, [taskId+noteId]',
+      settings: 'id',
+    }).upgrade((transaction) => transaction.table('taskNoteLinks').toCollection().modify((link) => {
+      link.deletedAt ??= null
+    }))
   }
 }
 
