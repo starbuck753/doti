@@ -1,54 +1,62 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { Language, Theme } from '../../domain/models'
+import type { AccentColor, Language, Settings, Theme } from '../../domain/models'
 import { db, defaultSettings } from '../../data/db'
 
 interface AppSettingsContextValue {
   language: Language
   theme: Theme
+  accentColor: AccentColor
   priorityAgingEnabled: boolean
   priorityAgingIntervalDays: number
   setLanguage: (language: Language) => void
   setTheme: (theme: Theme) => void
+  setAccentColor: (accentColor: AccentColor) => void
+  setPriorityAgingEnabled: (enabled: boolean) => void
+  setPriorityAgingIntervalDays: (days: number) => void
 }
 
 const AppSettingsContext = createContext<AppSettingsContextValue | null>(null)
 
 export function AppSettingsProvider({ children }: { children: ReactNode }) {
   const { i18n } = useTranslation()
-  const [language, setLanguageState] = useState<Language>(defaultSettings.language)
-  const [theme, setThemeState] = useState<Theme>(defaultSettings.theme)
-  const [priorityAgingEnabled, setPriorityAgingEnabled] = useState(defaultSettings.priorityAgingEnabled)
-  const [priorityAgingIntervalDays, setPriorityAgingIntervalDays] = useState(defaultSettings.priorityAgingIntervalDays)
+  const [settings, setSettings] = useState<Settings>(defaultSettings)
 
   useEffect(() => {
     void db.settings.get('app').then((stored) => {
-      if (!stored) return void db.settings.put(defaultSettings)
-      setLanguageState(stored.language ?? defaultSettings.language)
-      setThemeState(stored.theme ?? defaultSettings.theme)
-      setPriorityAgingEnabled(stored.priorityAgingEnabled ?? defaultSettings.priorityAgingEnabled)
-      setPriorityAgingIntervalDays(stored.priorityAgingIntervalDays ?? defaultSettings.priorityAgingIntervalDays)
-      void i18n.changeLanguage(stored.language ?? defaultSettings.language)
+      const next = { ...defaultSettings, ...stored }
+      setSettings(next)
+      if (!stored || stored.accentColor === undefined || stored.priorityAgingEnabled === undefined || stored.priorityAgingIntervalDays === undefined) void db.settings.put(next)
+      void i18n.changeLanguage(next.language)
     })
   }, [i18n])
 
   useEffect(() => {
-    document.documentElement.dataset.theme = theme
-  }, [theme])
+    const media = window.matchMedia('(prefers-color-scheme: dark)')
+    const applyTheme = () => { document.documentElement.dataset.theme = settings.theme === 'system' ? (media.matches ? 'dark' : 'light') : settings.theme }
+    document.documentElement.dataset.accent = settings.accentColor
+    applyTheme()
+    media.addEventListener?.('change', applyTheme)
+    return () => media.removeEventListener?.('change', applyTheme)
+  }, [settings.theme, settings.accentColor])
 
-  const save = (next: Partial<{ language: Language; theme: Theme }>) => {
-    const updated = { ...defaultSettings, language, theme, ...next, updatedAt: new Date().toISOString() }
-    void db.settings.put(updated)
+  const update = (patch: Partial<Settings>) => {
+    const next = { ...settings, ...patch, updatedAt: new Date().toISOString() }
+    void db.settings.put(next)
+    setSettings(next)
   }
-
   const value = useMemo(() => ({
-    language,
-    theme,
-    setLanguage: (next: Language) => { setLanguageState(next); void i18n.changeLanguage(next); save({ language: next }) },
-    setTheme: (next: Theme) => { setThemeState(next); save({ theme: next }) },
-    priorityAgingEnabled,
-    priorityAgingIntervalDays,
-  }), [language, theme, i18n, priorityAgingEnabled, priorityAgingIntervalDays])
+    language: settings.language,
+    theme: settings.theme,
+    accentColor: settings.accentColor,
+    priorityAgingEnabled: settings.priorityAgingEnabled,
+    priorityAgingIntervalDays: settings.priorityAgingIntervalDays,
+    setLanguage: (language: Language) => { void i18n.changeLanguage(language); update({ language }) },
+    setTheme: (theme: Theme) => update({ theme }),
+    setAccentColor: (accentColor: AccentColor) => update({ accentColor }),
+    setPriorityAgingEnabled: (priorityAgingEnabled: boolean) => update({ priorityAgingEnabled }),
+    setPriorityAgingIntervalDays: (priorityAgingIntervalDays: number) => update({ priorityAgingIntervalDays }),
+  }), [settings, i18n])
 
   return <AppSettingsContext.Provider value={value}>{children}</AppSettingsContext.Provider>
 }
