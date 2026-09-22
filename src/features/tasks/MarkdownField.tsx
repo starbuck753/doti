@@ -25,11 +25,11 @@ function MarkdownPreview({ value }: { value: string }) {
   })}</div>
 }
 
-export function MarkdownField({ value, onChange, onBlur }: { value: string; onChange: (value: string) => void; onBlur: () => void }) {
+export function MarkdownField({ value, onChange, onBlur, emptyLabel }: { value: string; onChange: (value: string) => void; onBlur: () => void; emptyLabel?: string }) {
   const { t } = useTranslation()
   const [mode, setMode] = useState<'edit' | 'preview'>('preview')
   return <div className="markdown-field">
     <div className="field-heading"><h2>{t('taskDetail.description')}</h2><div className="mode-toggle"><button className={mode === 'edit' ? 'selected' : ''} onClick={() => setMode('edit')}>{t('taskDetail.edit')}</button><button className={mode === 'preview' ? 'selected' : ''} onClick={() => setMode('preview')}>{t('taskDetail.preview')}</button></div></div>
-    {mode === 'edit' ? <textarea className="description-editor" value={value} onChange={(event: { target: HTMLTextAreaElement }) => onChange(event.target.value)} onBlur={onBlur} placeholder={t('taskDetail.addDescription')} /> : value.trim() ? <MarkdownPreview value={value} /> : <button className="empty-description" onClick={() => setMode('edit')}>{t('taskDetail.addDescription')}</button>}
+    {mode === 'edit' ? <textarea className="description-editor" value={value} onChange={(event: { target: HTMLTextAreaElement }) => onChange(event.target.value)} onBlur={onBlur} placeholder={emptyLabel ?? t('taskDetail.addDescription')} /> : value.trim() ? <MarkdownPreview value={value} /> : <button className="empty-description" onClick={() => setMode('edit')}>{emptyLabel ?? t('taskDetail.addDescription')}</button>}
   </div>
 }

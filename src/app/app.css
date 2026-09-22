@@ -27,6 +27,37 @@ h1 { font-size: clamp(2rem, 8vw, 3.5rem); line-height: 1; letter-spacing: -0.06e
 .priority-green { background: #71a84a; }.priority-yellow { background: #d8b63d; }.priority-orange { background: #df7e37; }.priority-red { background: #d75858; }
 .upcoming-placeholder { margin-top: 4rem; padding-top: 1.2rem; border-top: 1px solid var(--border); color: var(--muted); }
 .upcoming-placeholder p { font-size: .9rem; }
+.birthdays-page { max-width: 620px; margin: 0 auto; }
+.birthdays-heading { display: flex; align-items: flex-start; justify-content: space-between; }
+.birthdays-heading h1 { margin-bottom: 0; }
+.birthday-list { margin-top: 2.5rem; }
+.birthday-row { display: grid; grid-template-columns: 5.3rem 1fr auto; align-items: center; gap: .75rem; width: 100%; min-height: 3.3rem; border: 0; border-bottom: 1px solid var(--border); background: transparent; color: var(--text); cursor: pointer; padding: .65rem .25rem; text-align: left; }
+.birthday-row:hover, .birthday-row:focus-visible { background: var(--accent-soft); outline: none; }
+.birthday-date { color: var(--muted); font-size: .85rem; }
+.birthday-name { font-size: .97rem; overflow-wrap: anywhere; }
+.birthday-proximity { color: var(--muted); font-size: .8rem; text-align: right; white-space: nowrap; }
+.birthday-today { background: var(--birthday-today-bg); }.birthday-soon { background: var(--birthday-soon-bg); }
+.birthday-form { margin-top: 1.5rem; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 1.2rem 0 1.3rem; }
+.birthday-form label { display: block; color: var(--muted); font-size: .75rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.birthday-form input, .birthday-form select { display: block; width: 100%; margin-top: .45rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); font: inherit; padding: .7rem .75rem; text-transform: none; }
+.birthday-form-date { display: grid; grid-template-columns: 1fr 6rem; gap: .75rem; margin-top: .9rem; }
+.form-error { color: var(--danger); font-size: .85rem; margin: .8rem 0 0; }
+.birthday-form-actions { display: flex; align-items: center; flex-wrap: wrap; gap: .55rem; margin-top: 1.1rem; }
+.primary-action, .secondary-action, .delete-birthday { border-radius: 8px; cursor: pointer; padding: .65rem .9rem; }
+.primary-action { border: 1px solid var(--accent); background: var(--accent); color: var(--surface); }.secondary-action { border: 1px solid var(--border); background: transparent; color: var(--text); }.delete-birthday { border: 0; background: transparent; color: var(--danger); margin-left: auto; }
+.empty-birthdays { border: 0; background: transparent; color: var(--muted); cursor: pointer; padding: 1.2rem 0; }
+.upcoming-birthdays { margin-top: 4rem; border-top: 1px solid var(--border); padding-top: 1.2rem; }
+.upcoming-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: .45rem; }
+.upcoming-heading h2 { font-size: .8rem; letter-spacing: .12em; margin: 0; text-transform: uppercase; }.upcoming-heading button { border: 0; background: none; color: var(--accent); cursor: pointer; font-size: .8rem; }.upcoming-birthdays .birthday-row { min-height: 2.8rem; }
+.dashboard-empty { padding-top: .4rem; }
+.notes-page, .note-detail-page { max-width: 620px; margin: 0 auto; }
+.notes-heading { display: flex; align-items: flex-start; justify-content: space-between; }
+.notes-heading h1 { margin-bottom: 0; }
+.notes-search, .note-create-input { width: 100%; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); font: inherit; padding: .8rem .9rem; }
+.notes-search { margin-top: 2rem; }.note-create-input { border-color: var(--accent); margin-top: 1.1rem; }
+.notes-list { margin-top: 1.6rem; }.note-row { display: flex; align-items: center; gap: .8rem; width: 100%; min-height: 4.1rem; border: 0; border-bottom: 1px solid var(--border); background: transparent; color: var(--text); cursor: pointer; padding: .7rem .25rem; text-align: left; }
+.note-row:hover, .note-row:focus-visible { background: var(--accent-soft); outline: none; }.note-mark { color: var(--muted); font-size: 1.2rem; }.note-row-content { display: flex; flex-direction: column; gap: .3rem; min-width: 0; }.note-row-content strong { overflow-wrap: anywhere; }.note-row-content small { color: var(--muted); font-size: .78rem; }
+.notes-empty { color: var(--muted); padding: 1.2rem .25rem; }.note-detail-page { padding-bottom: 2rem; }.note-title-input { width: 100%; margin: 2rem 0 2.2rem; border: 0; border-bottom: 1px solid var(--border); background: transparent; color: var(--text); font-size: clamp(1.6rem, 7vw, 2.4rem); font-weight: 700; letter-spacing: -.05em; outline: none; padding: .25rem 0 .55rem; }.note-title-input:focus { border-color: var(--accent); }.note-not-found h1 { font-size: clamp(2rem, 8vw, 3rem); margin-top: 3rem; }
 .detail-page { max-width: 620px; margin: 0 auto; }
 .back-link { border: 0; background: none; color: var(--muted); cursor: pointer; padding: 0; font-size: .9rem; }
 .detail-title-row { display: flex; align-items: center; gap: .7rem; margin: 2rem 0 2.3rem; }

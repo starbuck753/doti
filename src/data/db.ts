@@ -13,7 +13,7 @@ export class DotiDatabase extends Dexie {
     this.version(1).stores({
       tasks: 'id, status, dueDate, createdAt, updatedAt',
       notes: 'id, createdAt, updatedAt',
-      birthdays: 'id, date, name',
+      birthdays: 'id, month, day, name, updatedAt',
       taskNoteLinks: 'id, taskId, noteId, [taskId+noteId]',
       settings: 'id',
     })
@@ -35,6 +35,31 @@ export class DotiDatabase extends Dexie {
         task.deletedAt ??= null
       })
     })
+    this.version(3).stores({
+      tasks: 'id, status, bucket, priorityBase, dueDate, createdAt, updatedAt',
+      notes: 'id, createdAt, updatedAt',
+      birthdays: 'id, month, day, name, updatedAt',
+      taskNoteLinks: 'id, taskId, noteId, [taskId+noteId]',
+      settings: 'id',
+    }).upgrade((transaction) => transaction.table('birthdays').toCollection().modify((birthday) => {
+      if (birthday.month === undefined && birthday.date) {
+        const parsed = new Date(birthday.date)
+        birthday.month = parsed.getMonth() + 1
+        birthday.day = parsed.getDate()
+      }
+      birthday.deletedAt ??= null
+      delete birthday.date
+      delete birthday.notes
+    }))
+    this.version(4).stores({
+      tasks: 'id, status, bucket, priorityBase, dueDate, createdAt, updatedAt',
+      notes: 'id, createdAt, updatedAt, deletedAt',
+      birthdays: 'id, month, day, name, updatedAt',
+      taskNoteLinks: 'id, taskId, noteId, [taskId+noteId]',
+      settings: 'id',
+    }).upgrade((transaction) => transaction.table('notes').toCollection().modify((note) => {
+      note.deletedAt ??= null
+    }))
   }
 }
 
