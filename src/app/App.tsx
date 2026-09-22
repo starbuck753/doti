@@ -2,6 +2,7 @@ import { NavLink, Outlet, Route, Routes } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAppSettings } from './providers/AppSettingsProvider'
 import { SettingsPage } from '../features/settings/SettingsPage'
+import { TasksDashboard } from '../features/tasks/TasksDashboard'
 import './app.css'
 
 function Layout() {
@@ -28,8 +29,8 @@ export function App() {
   return <div data-current-theme={theme}>
     <Routes>
       <Route element={<Layout />}>
-        <Route path="/" element={<Placeholder title={t('navigation.tasks')} />} />
-        <Route path="/tasks" element={<Placeholder title={t('navigation.tasks')} />} />
+        <Route path="/" element={<TasksDashboard />} />
+        <Route path="/tasks" element={<TasksDashboard />} />
         <Route path="/tasks/:taskId" element={<Placeholder title="Task Detail" />} />
         <Route path="/birthdays" element={<Placeholder title={t('navigation.birthdays')} />} />
         <Route path="/notes" element={<Placeholder title={t('navigation.notes')} />} />

@@ -6,6 +6,8 @@ import { db, defaultSettings } from '../../data/db'
 interface AppSettingsContextValue {
   language: Language
   theme: Theme
+  priorityAgingEnabled: boolean
+  priorityAgingIntervalDays: number
   setLanguage: (language: Language) => void
   setTheme: (theme: Theme) => void
 }
@@ -16,13 +18,17 @@ export function AppSettingsProvider({ children }: { children: ReactNode }) {
   const { i18n } = useTranslation()
   const [language, setLanguageState] = useState<Language>(defaultSettings.language)
   const [theme, setThemeState] = useState<Theme>(defaultSettings.theme)
+  const [priorityAgingEnabled, setPriorityAgingEnabled] = useState(defaultSettings.priorityAgingEnabled)
+  const [priorityAgingIntervalDays, setPriorityAgingIntervalDays] = useState(defaultSettings.priorityAgingIntervalDays)
 
   useEffect(() => {
     void db.settings.get('app').then((stored) => {
       if (!stored) return void db.settings.put(defaultSettings)
-      setLanguageState(stored.language)
-      setThemeState(stored.theme)
-      void i18n.changeLanguage(stored.language)
+      setLanguageState(stored.language ?? defaultSettings.language)
+      setThemeState(stored.theme ?? defaultSettings.theme)
+      setPriorityAgingEnabled(stored.priorityAgingEnabled ?? defaultSettings.priorityAgingEnabled)
+      setPriorityAgingIntervalDays(stored.priorityAgingIntervalDays ?? defaultSettings.priorityAgingIntervalDays)
+      void i18n.changeLanguage(stored.language ?? defaultSettings.language)
     })
   }, [i18n])
 
@@ -40,7 +46,9 @@ export function AppSettingsProvider({ children }: { children: ReactNode }) {
     theme,
     setLanguage: (next: Language) => { setLanguageState(next); void i18n.changeLanguage(next); save({ language: next }) },
     setTheme: (next: Theme) => { setThemeState(next); save({ theme: next }) },
-  }), [language, theme, i18n])
+    priorityAgingEnabled,
+    priorityAgingIntervalDays,
+  }), [language, theme, i18n, priorityAgingEnabled, priorityAgingIntervalDays])
 
   return <AppSettingsContext.Provider value={value}>{children}</AppSettingsContext.Provider>
 }

@@ -2,16 +2,22 @@ export type EntityId = string
 export type Language = 'en' | 'es'
 export type Theme = 'light' | 'dark'
 export type TaskStatus = 'active' | 'completed' | 'archived'
+export type TaskBucket = 'today' | 'later'
+export type PriorityLevel = 1 | 2 | 3 | 4
 
 export interface Task {
   id: EntityId
   title: string
-  description?: string
   status: TaskStatus
-  dueDate?: string
-  completedAt?: string
+  bucket: TaskBucket
+  priorityBase: PriorityLevel
+  priorityAgingStartedAt: string
+  description: string
+  dueDate: string | null
+  completedAt: string | null
   createdAt: string
   updatedAt: string
+  deletedAt: string | null
 }
 
 export interface Note {
@@ -42,5 +48,7 @@ export interface Settings {
   id: 'app'
   language: Language
   theme: Theme
+  priorityAgingEnabled: boolean
+  priorityAgingIntervalDays: number
   updatedAt: string
 }

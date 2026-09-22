@@ -8,6 +8,7 @@ declare module 'react' {
   export function useContext(context: any): any
   export function useEffect(effect: () => void | (() => void), deps?: any[]): void
   export function useMemo<T>(factory: () => T, deps: any[]): T
+  export function useCallback<T extends (...args: any[]) => any>(callback: T, deps: any[]): T
   export function useState<T>(initial: T): [T, (value: T) => void]
   export const StrictMode: any
 }
