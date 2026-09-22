@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAppSettings } from '../../app/providers/AppSettingsProvider'
 import type { PriorityLevel, Task, TaskBucket } from '../../domain/models'
@@ -9,6 +9,12 @@ import { UpcomingBirthdays } from '../birthdays/BirthdaysPage'
 import { useTaskLinkIndicators } from '../links/useTaskNoteLinks'
 
 const priorityColors = { 1: 'priority-green', 2: 'priority-yellow', 3: 'priority-orange', 4: 'priority-red' } as const
+
+function TasksOverflowMenu() {
+  const { t } = useTranslation()
+  const [open, setOpen] = useState(false)
+  return <div className="tasks-overflow"><button className="overflow-button" aria-label={t('tasks.more')} onClick={() => setOpen(!open)}>•••</button>{open && <div className="overflow-menu"><Link to="/completed" onClick={() => setOpen(false)}>{t('completed.title')}</Link><Link to="/settings" onClick={() => setOpen(false)}>{t('navigation.settings')}</Link></div>}</div>
+}
 
 function TaskRow({ task, hasLinkedNotes, onComplete, onRestore, onPriority }: { key?: string; task: Task; hasLinkedNotes: boolean; onComplete: () => void; onRestore: () => void; onPriority: (priority: PriorityLevel) => void }) {
   const { t } = useTranslation()
@@ -43,7 +49,7 @@ export function TasksDashboard() {
   const { taskIdsWithNotes } = useTaskLinkIndicators(tasks.map((task) => task.id))
   const sorted = sortTasksForDashboard(tasks, settings)
   const date = new Intl.DateTimeFormat(i18n.language, { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date())
-  return <section className="tasks-page"><p className="eyebrow">Doti</p><h1>{t('navigation.tasks')}</h1><p className="current-date">{date}</p>
+  return <section className="tasks-page"><div className="tasks-page-heading"><div><p className="eyebrow">Doti</p><h1>{t('navigation.tasks')}</h1><p className="current-date">{date}</p></div><TasksOverflowMenu /></div>
     <TaskSection bucket="today" tasks={sorted.filter((task) => task.bucket === 'today')} linkedTaskIds={taskIdsWithNotes} onAdd={(title) => addTask(title, 'today')} onComplete={completeTask} onRestore={restoreTask} onPriority={changePriority} />
     <TaskSection bucket="later" tasks={sorted.filter((task) => task.bucket === 'later')} linkedTaskIds={taskIdsWithNotes} onAdd={(title) => addTask(title, 'later')} onComplete={completeTask} onRestore={restoreTask} onPriority={changePriority} />
     <UpcomingBirthdays />

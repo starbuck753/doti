@@ -7,6 +7,7 @@ import { TaskDetail } from '../features/tasks/TaskDetail'
 import { BirthdaysPage } from '../features/birthdays/BirthdaysPage'
 import { NotesPage } from '../features/notes/NotesPage'
 import { NoteDetail } from '../features/notes/NoteDetail'
+import { CompletedTasksPage } from '../features/tasks/CompletedTasksPage'
 import './app.css'
 
 function Layout() {
@@ -39,7 +40,7 @@ export function App() {
         <Route path="/birthdays" element={<BirthdaysPage />} />
         <Route path="/notes" element={<NotesPage />} />
         <Route path="/notes/:noteId" element={<NoteDetail />} />
-        <Route path="/completed" element={<Placeholder title={t('navigation.completed')} />} />
+        <Route path="/completed" element={<CompletedTasksPage />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Route>
     </Routes>
