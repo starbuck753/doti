@@ -5,6 +5,7 @@ const now = () => new Date().toISOString()
 
 export const taskRepository = {
   async listAll() { return db.tasks.filter((task) => task.deletedAt === null || task.deletedAt === undefined).toArray() },
+  async listCompleted() { const tasks = await db.tasks.filter((task) => Boolean(task.completedAt) && (task.deletedAt === null || task.deletedAt === undefined)).toArray(); return tasks.sort((a, b) => (b.completedAt ?? '').localeCompare(a.completedAt ?? '')) },
   async get(id: string) { return db.tasks.get(id) },
   async listDashboard() {
     const tasks = await db.tasks.filter((task) => task.deletedAt === null || task.deletedAt === undefined).toArray()
@@ -18,6 +19,7 @@ export const taskRepository = {
   },
   async complete(task: Task) { const updated = { ...task, status: 'completed' as const, completedAt: now(), updatedAt: now() }; await db.tasks.put(updated); return updated },
   async restore(task: Task) { const updated = { ...task, status: 'active' as const, completedAt: null, updatedAt: now() }; await db.tasks.put(updated); return updated },
+  async restoreFromHistory(task: Task) { const timestamp = now(); const updated = { ...task, status: 'active' as const, completedAt: null, bucket: 'today' as const, priorityAgingStartedAt: timestamp, updatedAt: timestamp }; await db.tasks.put(updated); return updated },
   async changePriority(task: Task, priority: PriorityLevel) { const timestamp = now(); const updated = { ...task, priorityBase: priority, priorityAgingStartedAt: timestamp, updatedAt: timestamp }; await db.tasks.put(updated); return updated },
   async update(task: Task, changes: Partial<Pick<Task, 'title' | 'description' | 'bucket' | 'dueDate'>>) {
     const updated = { ...task, ...changes, updatedAt: now() }
