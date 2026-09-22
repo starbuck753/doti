@@ -44,6 +44,7 @@ export interface TaskNoteLink {
   taskId: EntityId
   noteId: EntityId
   createdAt: string
+  deletedAt: string | null
 }
 
 export interface Settings {

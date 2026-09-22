@@ -4,6 +4,7 @@ import type { PriorityLevel, Task, TaskBucket } from '../../domain/models'
 const now = () => new Date().toISOString()
 
 export const taskRepository = {
+  async listAll() { return db.tasks.filter((task) => task.deletedAt === null || task.deletedAt === undefined).toArray() },
   async get(id: string) { return db.tasks.get(id) },
   async listDashboard() {
     const tasks = await db.tasks.filter((task) => task.deletedAt === null || task.deletedAt === undefined).toArray()

@@ -15,3 +15,10 @@ export function useTasks() {
     changePriority: (task: Task, priority: PriorityLevel) => update(() => taskRepository.changePriority(task, priority)),
   }
 }
+
+export function useAllTasks() {
+  const [tasks, setTasks] = useState<Task[]>([])
+  const refresh = useCallback(async () => setTasks(await taskRepository.listAll()), [])
+  useEffect(() => { void refresh() }, [refresh])
+  return { tasks, refresh }
+}
