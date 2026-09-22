@@ -69,6 +69,18 @@ export class DotiDatabase extends Dexie {
     }).upgrade((transaction) => transaction.table('taskNoteLinks').toCollection().modify((link) => {
       link.deletedAt ??= null
     }))
+    this.version(6).stores({
+      tasks: 'id, status, bucket, priorityBase, dueDate, createdAt, updatedAt',
+      notes: 'id, createdAt, updatedAt, deletedAt',
+      birthdays: 'id, month, day, name, updatedAt',
+      taskNoteLinks: 'id, taskId, noteId, deletedAt, [taskId+noteId]',
+      settings: 'id',
+    }).upgrade((transaction) => transaction.table('settings').toCollection().modify((settings) => {
+      settings.theme ??= 'system'
+      settings.accentColor ??= 'green'
+      settings.priorityAgingEnabled ??= true
+      settings.priorityAgingIntervalDays ??= 7
+    }))
   }
 }
 
@@ -77,7 +89,8 @@ export const db = new DotiDatabase()
 export const defaultSettings: Settings = {
   id: 'app',
   language: 'en',
-  theme: 'light',
+  theme: 'system',
+  accentColor: 'green',
   priorityAgingEnabled: true,
   priorityAgingIntervalDays: 7,
   updatedAt: new Date().toISOString(),

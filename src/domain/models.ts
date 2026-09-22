@@ -1,6 +1,7 @@
 export type EntityId = string
 export type Language = 'en' | 'es'
-export type Theme = 'light' | 'dark'
+export type Theme = 'system' | 'light' | 'dark'
+export type AccentColor = 'blue' | 'purple' | 'pink' | 'green' | 'orange' | 'teal'
 export type TaskStatus = 'active' | 'completed' | 'archived'
 export type TaskBucket = 'today' | 'later'
 export type PriorityLevel = 1 | 2 | 3 | 4
@@ -51,6 +52,7 @@ export interface Settings {
   id: 'app'
   language: Language
   theme: Theme
+  accentColor: AccentColor
   priorityAgingEnabled: boolean
   priorityAgingIntervalDays: number
   updatedAt: string
