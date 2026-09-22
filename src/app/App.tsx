@@ -4,6 +4,9 @@ import { useAppSettings } from './providers/AppSettingsProvider'
 import { SettingsPage } from '../features/settings/SettingsPage'
 import { TasksDashboard } from '../features/tasks/TasksDashboard'
 import { TaskDetail } from '../features/tasks/TaskDetail'
+import { BirthdaysPage } from '../features/birthdays/BirthdaysPage'
+import { NotesPage } from '../features/notes/NotesPage'
+import { NoteDetail } from '../features/notes/NoteDetail'
 import './app.css'
 
 function Layout() {
@@ -33,9 +36,9 @@ export function App() {
         <Route path="/" element={<TasksDashboard />} />
         <Route path="/tasks" element={<TasksDashboard />} />
         <Route path="/tasks/:taskId" element={<TaskDetail />} />
-        <Route path="/birthdays" element={<Placeholder title={t('navigation.birthdays')} />} />
-        <Route path="/notes" element={<Placeholder title={t('navigation.notes')} />} />
-        <Route path="/notes/:noteId" element={<Placeholder title="Note Detail" />} />
+        <Route path="/birthdays" element={<BirthdaysPage />} />
+        <Route path="/notes" element={<NotesPage />} />
+        <Route path="/notes/:noteId" element={<NoteDetail />} />
         <Route path="/completed" element={<Placeholder title={t('navigation.completed')} />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Route>

@@ -5,6 +5,7 @@ import { useAppSettings } from '../../app/providers/AppSettingsProvider'
 import type { PriorityLevel, Task, TaskBucket } from '../../domain/models'
 import { getEffectivePriority, sortTasksForDashboard } from './taskUtils'
 import { useTasks } from './useTasks'
+import { UpcomingBirthdays } from '../birthdays/BirthdaysPage'
 
 const priorityColors = { 1: 'priority-green', 2: 'priority-yellow', 3: 'priority-orange', 4: 'priority-red' } as const
 
@@ -43,6 +44,6 @@ export function TasksDashboard() {
   return <section className="tasks-page"><p className="eyebrow">Doti</p><h1>{t('navigation.tasks')}</h1><p className="current-date">{date}</p>
     <TaskSection bucket="today" tasks={sorted.filter((task) => task.bucket === 'today')} onAdd={(title) => addTask(title, 'today')} onComplete={completeTask} onRestore={restoreTask} onPriority={changePriority} />
     <TaskSection bucket="later" tasks={sorted.filter((task) => task.bucket === 'later')} onAdd={(title) => addTask(title, 'later')} onComplete={completeTask} onRestore={restoreTask} onPriority={changePriority} />
-    <section className="upcoming-placeholder"><h2>{t('tasks.upcomingBirthdays')}</h2><p>{t('placeholder')}</p></section>
+    <UpcomingBirthdays />
   </section>
 }

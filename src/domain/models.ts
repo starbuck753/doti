@@ -26,15 +26,17 @@ export interface Note {
   content: string
   createdAt: string
   updatedAt: string
+  deletedAt: string | null
 }
 
 export interface Birthday {
   id: EntityId
   name: string
-  date: string
-  notes?: string
+  month: number
+  day: number
   createdAt: string
   updatedAt: string
+  deletedAt: string | null
 }
 
 export interface TaskNoteLink {
