@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "lucide-react": "latest",
     "@vitejs/plugin-react": "latest",
     "dexie": "latest",
     "i18next": "latest",
