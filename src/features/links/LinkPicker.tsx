@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Search } from 'lucide-react'
 import type { TaskBucket } from '../../domain/models'
 
 export function LinkPicker({ title, searchPlaceholder, items, emptyLabel, createLabel, onSelect, onCreate, onClose }: { title: string; searchPlaceholder: string; items: { id: string; title: string }[]; emptyLabel: string; createLabel: string; onSelect: (id: string) => void; onCreate: () => void; onClose: () => void }) {
   const [query, setQuery] = useState('')
   const filtered = items.filter((item) => item.title.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()))
-  return <div className="link-picker"><div className="link-picker-header"><strong>{title}</strong><button onClick={onClose}>×</button></div><input autoFocus className="link-picker-search" value={query} onChange={(event: { target: HTMLInputElement }) => setQuery(event.target.value)} placeholder={searchPlaceholder} />
+  return <div className="link-picker"><div className="link-picker-header"><strong>{title}</strong><button onClick={onClose}>×</button></div><div className="link-picker-search-wrap"><Search className="link-picker-search-icon" aria-hidden="true" /><input autoFocus className="link-picker-search" value={query} onChange={(event: { target: HTMLInputElement }) => setQuery(event.target.value)} placeholder={searchPlaceholder} /></div>
     <div className="link-picker-items">{filtered.map((item) => <button key={item.id} onClick={() => onSelect(item.id)}>{item.title}</button>)}{!filtered.length && <span className="link-picker-empty">{emptyLabel}</span>}</div><button className="link-picker-create" onClick={onCreate}>+ {createLabel}</button>
   </div>
 }
