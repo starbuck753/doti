@@ -12,6 +12,7 @@ export function useTasks() {
     addTask: async (title: string, bucket: TaskBucket) => { if (title.trim()) await update(() => taskRepository.create(title, bucket)) },
     completeTask: (task: Task) => update(() => taskRepository.complete(task)),
     restoreTask: (task: Task) => update(() => taskRepository.restore(task)),
+    moveTask: (task: Task, bucket: TaskBucket) => update(() => taskRepository.move(task, bucket)),
     changePriority: (task: Task, priority: PriorityLevel) => update(() => taskRepository.changePriority(task, priority)),
   }
 }
