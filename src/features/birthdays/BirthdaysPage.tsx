@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { Plus } from 'lucide-react'
+import { DotiBrand } from '../../app/DotiBrand'
 import type { Birthday } from '../../domain/models'
 import { BirthdayRow } from './BirthdayRow'
 import { useBirthdays } from './useBirthdays'
@@ -38,7 +39,7 @@ export function BirthdaysPage() {
   const closeForm = () => { setEditing(undefined); setFormOpen(false) }
   const save = async (name: string, month: number, day: number) => { if (editing) await updateBirthday(editing, name, month, day); else await addBirthday(name, month, day); closeForm() }
   const remove = async () => { if (editing && window.confirm(t('birthdays.confirmDelete'))) { await deleteBirthday(editing); closeForm() } }
-  return <section className="birthdays-page"><div className="birthdays-heading"><div><p className="eyebrow">Doti</p><h1>{t('navigation.birthdays')}</h1></div><button className="add-button" aria-label={t('birthdays.addTitle')} onClick={openCreate}><Plus aria-hidden="true" /></button></div>
+  return <section className="birthdays-page"><div className="birthdays-heading"><div><p className="eyebrow"><DotiBrand /></p><h1>{t('navigation.birthdays')}</h1></div><button className="add-button" aria-label={t('birthdays.addTitle')} onClick={openCreate}><Plus aria-hidden="true" /></button></div>
     {formOpen && <BirthdayForm birthday={editing} onSave={save} onDelete={editing ? remove : undefined} onCancel={closeForm} />}
     <div className="section-heading birthdays-list-heading"><h2>{t('tasks.upcomingBirthdays')}</h2></div>
     <div className="birthday-list">{birthdays.map((birthday) => <BirthdayRow key={birthday.id} birthday={birthday} onClick={() => { setEditing(birthday); setFormOpen(true) }} />)}</div>
