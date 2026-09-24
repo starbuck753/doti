@@ -61,7 +61,7 @@
   --color-surface: #ffffff;
   --color-text: #1f2321;
   --color-text-muted: #6c736b;
-  --color-border: #dfe3d9;
+  --color-border: #dddddd; /*#dfe3d9;*/
   --accent: #527d2d;
   --accent-hover: #416522;
   --accent-soft: #edf3e7;
