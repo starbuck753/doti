@@ -9,10 +9,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "lucide-react": "latest",
     "@vitejs/plugin-react": "latest",
     "dexie": "latest",
     "i18next": "latest",
+    "lucide-react": "latest",
     "react": "latest",
     "react-dom": "latest",
     "react-i18next": "latest",
@@ -20,6 +20,7 @@
   },
   "devDependencies": {
     "typescript": "latest",
-    "vite": "latest"
+    "vite": "latest",
+    "vite-plugin-pwa": "^1.3.0"
   }
 }

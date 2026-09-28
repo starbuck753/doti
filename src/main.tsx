@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import './i18n'
 import './styles/global.css'
+import './pwa'
 import { App } from './app/App'
 import { AppSettingsProvider } from './app/providers/AppSettingsProvider'
 
