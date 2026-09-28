@@ -4,7 +4,11 @@ export function DotiBrand() {
       <span className="doti-priority-dot priority-green" />
       <span className="doti-priority-dot priority-yellow" />
       <span className="doti-priority-dot priority-orange" />
+      D
+      {/* <span className="doti-brand-o" aria-hidden="true">O</span> */}
+      <span className="doti-priority-dot priority-red" />
+      <span aria-hidden="true">T</span>
+      I
     </span>
-    <span aria-hidden="true">D<span className="doti-priority-dot priority-red" />ti</span>
   </span>
 }

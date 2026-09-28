@@ -27,23 +27,26 @@
 .doti-brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  /*gap: 0.2rem;*/
+}
+.doti-brand-o {
+  color: #d75858;
 }
 .doti-priority-dots {
   display: inline-flex;
   align-items: center;
-  gap: 0.15rem;
+  gap: 0.3rem;
 }
 .doti-priority-dot {
   display: inline-block;
-  width: 0.42rem;
-  height: 0.42rem;
+  width: 0.44rem;
+  height: 0.44rem;
   flex: 0 0 auto;
   border-radius: 50%;
   vertical-align: middle;
 }
 .doti-brand > span:last-child .doti-priority-dot {
-  margin: 0 0.08rem;
+  margin: 0 /*0.08rem;*/
 }
 
 h1 {
@@ -54,6 +57,12 @@ h1 {
 }
 
 .tasks-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.dashboard-task-list {
   display: flex;
   flex-direction: column;
   gap: 1.15rem;
@@ -1254,6 +1263,8 @@ input.link-picker-search:focus-visible { outline: none !important; }
 }
 .dashboard-empty:hover, .dashboard-empty:focus-visible { background: transparent; }
 
+.upcoming-birthday-extra { display: none; }
+
 .bottom-nav {
   position: fixed;
   bottom: 0;
@@ -1304,6 +1315,16 @@ input.link-picker-search:focus-visible { outline: none !important; }
 }
 @media (min-width: 768px) {
   .page-content { padding-top: var(--space-6); }
-  .tasks-page { gap: 2rem; }
+  .tasks-page {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(18rem, 0.85fr);
+    align-items: start;
+    column-gap: 2.5rem;
+    row-gap: 2rem;
+  }
+  .tasks-page-heading { grid-column: 1 / -1; }
+  .dashboard-task-list { gap: 2rem; }
+  .upcoming-birthdays { margin-top: 0; }
+  .upcoming-birthday-extra { display: block; }
 }
 
