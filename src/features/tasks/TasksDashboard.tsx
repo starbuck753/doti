@@ -82,8 +82,10 @@ export function TasksDashboard() {
   const date = new Intl.DateTimeFormat(i18n.language, { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date())
 
   return <section className="tasks-page"><div className="tasks-page-heading"><div><p className="eyebrow"><DotiBrand /></p><h1>{t('navigation.tasks')}</h1><p className="current-date">{date}</p></div><TasksOverflowMenu /></div>
-    <TaskSection bucket="today" tasks={sorted.filter((task) => task.bucket === 'today')} linkedTaskIds={taskIdsWithNotes} onAdd={(title) => addTask(title, 'today')} onComplete={completeTask} onRestore={restoreTask} onMove={(task) => moveTask(task, 'later')} onPriority={changePriority} />
-    <TaskSection bucket="later" tasks={sorted.filter((task) => task.bucket === 'later')} linkedTaskIds={taskIdsWithNotes} onAdd={(title) => addTask(title, 'later')} onComplete={completeTask} onRestore={restoreTask} onMove={(task) => moveTask(task, 'today')} onPriority={changePriority} />
+    <div className="dashboard-task-list">
+      <TaskSection bucket="today" tasks={sorted.filter((task) => task.bucket === 'today')} linkedTaskIds={taskIdsWithNotes} onAdd={(title) => addTask(title, 'today')} onComplete={completeTask} onRestore={restoreTask} onMove={(task) => moveTask(task, 'later')} onPriority={changePriority} />
+      <TaskSection bucket="later" tasks={sorted.filter((task) => task.bucket === 'later')} linkedTaskIds={taskIdsWithNotes} onAdd={(title) => addTask(title, 'later')} onComplete={completeTask} onRestore={restoreTask} onMove={(task) => moveTask(task, 'today')} onPriority={changePriority} />
+    </div>
     <UpcomingBirthdays />
   </section>
 }

@@ -51,5 +51,5 @@ export function UpcomingBirthdays() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { birthdays } = useBirthdays()
-  return <section className="upcoming-birthdays"><div className="upcoming-heading"><h2>{t('tasks.upcomingBirthdays')}</h2><button onClick={() => navigate('/birthdays')}>{t('birthdays.seeAll')}</button></div>{birthdays.length ? birthdays.slice(0, 3).map((birthday) => <BirthdayRow key={birthday.id} birthday={birthday} onClick={() => navigate('/birthdays')} />) : <button className="empty-birthdays dashboard-empty" onClick={() => navigate('/birthdays')}>{t('birthdays.empty')}</button>}</section>
+  return <section className="upcoming-birthdays"><div className="upcoming-heading"><h2>{t('tasks.upcomingBirthdays')}</h2><button onClick={() => navigate('/birthdays')}>{t('birthdays.seeAll')}</button></div>{birthdays.length ? birthdays.slice(0, 5).map((birthday, index) => <div key={birthday.id} className={index >= 3 ? 'upcoming-birthday-extra' : undefined}><BirthdayRow birthday={birthday} onClick={() => navigate('/birthdays')} /></div>) : <button className="empty-birthdays dashboard-empty" onClick={() => navigate('/birthdays')}>{t('birthdays.empty')}</button>}</section>
 }

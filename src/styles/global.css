@@ -84,6 +84,13 @@
 :root[data-theme="light"][data-accent="teal"] { --accent: #287f7b; --accent-hover: #216963; --accent-soft: #e3f3f2; --accent-contrast: #fff; }
 :root[data-theme="dark"][data-accent="teal"] { --accent: #78d1cb; --accent-hover: #96e2dc; --accent-soft: #224342; --accent-contrast: #122b2a; }
 
+@media (min-width: 768px) {
+  :root {
+    --content-max-width: 1100px;
+    --page-padding: 2rem;
+  }
+}
+
 * { box-sizing: border-box; }
 html { min-width: 320px; background: var(--color-background); color: var(--color-text); }
 body { margin: 0; min-width: 320px; min-height: 100vh; background: var(--color-background); color: var(--color-text); }
