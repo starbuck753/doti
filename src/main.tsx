@@ -9,7 +9,7 @@ import { AppSettingsProvider } from './app/providers/AppSettingsProvider'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <AppSettingsProvider>
         <App />
       </AppSettingsProvider>

@@ -185,6 +185,22 @@ Core functionality works offline after installation/loading.
 
 User data remains stored in IndexedDB.
 
+## Deployment
+
+Doti is deployed using GitHub Pages and GitHub Actions.
+
+Pushes to the `main` production branch automatically trigger a production
+build and deployment. The site is served at:
+
+`https://starbuck753.github.io/doti/`
+
+To run Doti locally:
+
+```sh
+npm ci
+npm run dev
+```
+
 ## Future Ideas
 
 Potential future features:
