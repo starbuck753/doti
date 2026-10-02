@@ -10,6 +10,7 @@ declare module 'react' {
   export function useMemo<T>(factory: () => T, deps: any[]): T
   export function useCallback<T extends (...args: any[]) => any>(callback: T, deps: any[]): T
   export function useState<T>(initial: T): [T, (value: T) => void]
+  export function useRef<T>(initialValue: T): { current: T }
   export const StrictMode: any
 }
 

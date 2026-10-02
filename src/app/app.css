@@ -459,6 +459,15 @@ h1 {
 .settings-feedback.success { background: var(--accent-soft); color: var(--accent); }
 .settings-feedback.error { background: color-mix(in srgb, var(--danger) 12%, transparent); color: var(--danger); }
 .setting-value { color: var(--color-text-muted); font-size: var(--font-size-sm); }
+.sync-auth-form p,
+.sync-connected p { margin: 0; color: var(--color-text-muted); font-size: var(--font-size-sm); line-height: 1.45; }
+.sync-auth-form label { display: flex; flex-direction: column; gap: 0.35rem; color: var(--color-text); font-size: var(--font-size-sm); font-weight: 700; }
+.sync-auth-form input { width: 100%; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-text); padding: 0.7rem 0.75rem; font: inherit; }
+.sync-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.sync-actions button { border: 1px solid var(--accent); border-radius: var(--radius-md); background: var(--accent-soft); color: var(--accent); padding: 0.6rem 0.8rem; font: inherit; font-size: var(--font-size-sm); font-weight: 700; }
+.sync-actions button:hover { filter: brightness(0.96); }
+.sync-status { color: var(--accent) !important; font-weight: 700; }
+.sync-last-synced { font-size: var(--font-size-xs) !important; }
 
 .notes-heading {
   display: flex;

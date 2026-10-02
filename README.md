@@ -201,6 +201,17 @@ npm ci
 npm run dev
 ```
 
+## Supabase Sync Setup
+
+1. Create a Supabase project.
+2. Run `supabase/migrations/001_initial_sync_schema.sql` in the Supabase SQL editor.
+3. Copy the project URL and public anon/publishable key into a local `.env` using `.env.example`.
+4. Add repository variables named `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` under GitHub Settings → Secrets and variables → Actions → Variables.
+5. In Supabase Authentication → URL Configuration, set the Site URL to `https://starbuck753.github.io/doti/` and add that same URL as an allowed redirect URL.
+6. Push to `main` to build and deploy Doti with sync enabled.
+
+Only the public anon key belongs in the browser build. Never add a Supabase service-role key to local Vite variables, GitHub Pages variables, or the repository.
+
 ## Future Ideas
 
 Potential future features:

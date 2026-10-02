@@ -1,5 +1,6 @@
-import Dexie, { type EntityTable } from 'dexie'
+import Dexie, { type EntityTable, type Table } from 'dexie'
 import type { Birthday, Note, Settings, Task, TaskNoteLink } from '../domain/models'
+import type { SyncMeta, SyncState } from '../sync/types'
 
 export class DotiDatabase extends Dexie {
   tasks!: EntityTable<Task, 'id'>
@@ -7,6 +8,8 @@ export class DotiDatabase extends Dexie {
   birthdays!: EntityTable<Birthday, 'id'>
   taskNoteLinks!: EntityTable<TaskNoteLink, 'id'>
   settings!: EntityTable<Settings, 'id'>
+  syncState!: EntityTable<SyncState, 'id'>
+  syncMeta!: Table<SyncMeta, [string, string]>
 
   constructor() {
     super('doti-db')
@@ -80,6 +83,17 @@ export class DotiDatabase extends Dexie {
       settings.accentColor ??= 'green'
       settings.priorityAgingEnabled ??= true
       settings.priorityAgingIntervalDays ??= 7
+    }))
+    this.version(7).stores({
+      tasks: 'id, status, bucket, priorityBase, dueDate, createdAt, updatedAt, deletedAt',
+      notes: 'id, createdAt, updatedAt, deletedAt',
+      birthdays: 'id, month, day, name, updatedAt, deletedAt',
+      taskNoteLinks: 'id, taskId, noteId, updatedAt, deletedAt, [taskId+noteId]',
+      settings: 'id, updatedAt',
+      syncState: 'id, currentUserId, lastPullCursor',
+      syncMeta: '[entityType+entityId], entityType, entityId, lastSyncedLocalUpdatedAt',
+    }).upgrade((transaction) => transaction.table('taskNoteLinks').toCollection().modify((link) => {
+      link.updatedAt ??= link.deletedAt ?? link.createdAt ?? new Date().toISOString()
     }))
   }
 }

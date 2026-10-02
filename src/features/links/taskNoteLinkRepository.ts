@@ -1,5 +1,6 @@
 import { db } from '../../data/db'
 import type { Note, Task, TaskBucket, TaskNoteLink } from '../../domain/models'
+import { notifyLocalChange } from '../../sync/signals'
 
 const timestamp = () => new Date().toISOString()
 const active = (link: TaskNoteLink) => link.deletedAt === null || link.deletedAt === undefined
@@ -31,28 +32,29 @@ export const taskNoteLinkRepository = {
     const existing = matches.find(active)
     if (existing) return existing
     const old = matches[0]
-    if (old) { const restored = { ...old, deletedAt: null }; await db.taskNoteLinks.put(restored); return restored }
-    const link: TaskNoteLink = { id: crypto.randomUUID(), taskId, noteId, createdAt: timestamp(), deletedAt: null }
-    await db.taskNoteLinks.add(link)
+    if (old) { const restored = { ...old, deletedAt: null, updatedAt: timestamp() }; await db.taskNoteLinks.put(restored); notifyLocalChange(); return restored }
+    const now = timestamp()
+    const link: TaskNoteLink = { id: crypto.randomUUID(), taskId, noteId, createdAt: now, updatedAt: now, deletedAt: null }
+    await db.taskNoteLinks.add(link); notifyLocalChange()
     return link
   },
   async unlinkTaskFromNote(taskId: string, noteId: string) {
     const matches = await db.taskNoteLinks.where('[taskId+noteId]').equals([taskId, noteId]).toArray()
     const deletedAt = timestamp()
-    await Promise.all(matches.filter(active).map((link) => db.taskNoteLinks.put({ ...link, deletedAt })))
+    await Promise.all(matches.filter(active).map((link) => db.taskNoteLinks.put({ ...link, deletedAt, updatedAt: deletedAt }))); notifyLocalChange()
   },
   async createNoteAndLink(taskId: string, title: string) {
     const now = timestamp()
     const note: Note = { id: crypto.randomUUID(), title: title.trim(), content: '', createdAt: now, updatedAt: now, deletedAt: null }
-    const link: TaskNoteLink = { id: crypto.randomUUID(), taskId, noteId: note.id, createdAt: now, deletedAt: null }
-    await db.transaction('rw', db.notes, db.taskNoteLinks, async () => { await db.notes.add(note); await db.taskNoteLinks.add(link) })
+    const link: TaskNoteLink = { id: crypto.randomUUID(), taskId, noteId: note.id, createdAt: now, updatedAt: now, deletedAt: null }
+    await db.transaction('rw', db.notes, db.taskNoteLinks, async () => { await db.notes.add(note); await db.taskNoteLinks.add(link) }); notifyLocalChange()
     return note
   },
   async createTaskAndLink(noteId: string, title: string, bucket: TaskBucket) {
     const now = timestamp()
     const task: Task = { id: crypto.randomUUID(), title: title.trim(), status: 'active', bucket, priorityBase: 1, priorityAgingStartedAt: now, description: '', dueDate: null, completedAt: null, createdAt: now, updatedAt: now, deletedAt: null }
-    const link: TaskNoteLink = { id: crypto.randomUUID(), taskId: task.id, noteId, createdAt: now, deletedAt: null }
-    await db.transaction('rw', db.tasks, db.taskNoteLinks, async () => { await db.tasks.add(task); await db.taskNoteLinks.add(link) })
+    const link: TaskNoteLink = { id: crypto.randomUUID(), taskId: task.id, noteId, createdAt: now, updatedAt: now, deletedAt: null }
+    await db.transaction('rw', db.tasks, db.taskNoteLinks, async () => { await db.tasks.add(task); await db.taskNoteLinks.add(link) }); notifyLocalChange()
     return task
   },
 }

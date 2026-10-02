@@ -1,5 +1,6 @@
 import { db } from '../../data/db'
 import type { Note } from '../../domain/models'
+import { notifyLocalChange } from '../../sync/signals'
 
 const timestamp = () => new Date().toISOString()
 
@@ -12,18 +13,18 @@ export const noteRepository = {
   async create(title: string) {
     const now = timestamp()
     const note: Note = { id: crypto.randomUUID(), title: title.trim(), content: '', createdAt: now, updatedAt: now, deletedAt: null }
-    await db.notes.add(note)
+    await db.notes.add(note); notifyLocalChange()
     return note
   },
   async update(note: Note, changes: Partial<Pick<Note, 'title' | 'content'>>) {
     const updated = { ...note, ...changes, updatedAt: timestamp() }
-    await db.notes.put(updated)
+    await db.notes.put(updated); notifyLocalChange()
     return updated
   },
   async delete(note: Note) {
     const deletedAt = timestamp()
     const updated = { ...note, deletedAt, updatedAt: deletedAt }
-    await db.notes.put(updated)
+    await db.notes.put(updated); notifyLocalChange()
     return updated
   },
 }
