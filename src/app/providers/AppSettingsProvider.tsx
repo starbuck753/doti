@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import { useTranslation } from 'react-i18next'
 import type { AccentColor, Language, Settings, Theme } from '../../domain/models'
 import { db, defaultSettings } from '../../data/db'
+import { notifyLocalChange } from '../../sync/signals'
 
 interface AppSettingsContextValue {
   language: Language
@@ -42,7 +43,7 @@ export function AppSettingsProvider({ children }: { children: ReactNode }) {
 
   const update = (patch: Partial<Settings>) => {
     const next = { ...settings, ...patch, updatedAt: new Date().toISOString() }
-    void db.settings.put(next)
+    void db.settings.put(next).then(() => notifyLocalChange())
     setSettings(next)
   }
   const value = useMemo(() => ({

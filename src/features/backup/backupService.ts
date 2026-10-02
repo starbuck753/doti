@@ -1,5 +1,6 @@
 import { db, defaultSettings } from '../../data/db'
 import type { Birthday, Note, Settings, Task, TaskNoteLink } from '../../domain/models'
+import { resetSyncMetadata } from '../../sync/localSyncState'
 
 export const DotiBackupVersion = 1 as const
 const BACKUP_FORMAT = 'doti-backup' as const
@@ -42,7 +43,8 @@ function normalizeBirthday(value: unknown): Birthday {
 
 function normalizeLink(value: unknown, exportedAt: string): TaskNoteLink {
   if (!isRecord(value) || !requiredString(value, 'id') || !requiredString(value, 'taskId') || !requiredString(value, 'noteId')) throw new BackupValidationError('Invalid task-note link record')
-  return { id: value.id as string, taskId: value.taskId as string, noteId: value.noteId as string, createdAt: typeof value.createdAt === 'string' ? value.createdAt : exportedAt, deletedAt: typeof value.deletedAt === 'string' ? value.deletedAt : null }
+  const createdAt = typeof value.createdAt === 'string' ? value.createdAt : exportedAt
+  return { id: value.id as string, taskId: value.taskId as string, noteId: value.noteId as string, createdAt, updatedAt: typeof value.updatedAt === 'string' ? value.updatedAt : (typeof value.deletedAt === 'string' ? value.deletedAt : createdAt), deletedAt: typeof value.deletedAt === 'string' ? value.deletedAt : null }
 }
 
 function normalizeSettings(value: unknown): Settings {
@@ -96,6 +98,7 @@ export async function restoreBackup(backup: DotiBackupV1) {
     await db.settings.clear()
     await db.settings.add(backup.data.settings)
   })
+  await resetSyncMetadata()
 }
 
 export async function readBackupFile(file: File) {
