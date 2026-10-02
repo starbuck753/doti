@@ -69,7 +69,7 @@ function TaskSection({ bucket, tasks, linkedTaskIds, onAdd, onComplete, onRestor
   return <section className="task-section">
     <div className="section-heading"><h2>{t(`tasks.${bucket}`)}</h2><button type="button" className="add-button" aria-label={t('tasks.add')} onClick={() => setAdding(true)}><PlusIcon /></button></div>
     {adding && <input autoFocus className="quick-add" value={title} onChange={(event: { target: HTMLInputElement }) => setTitle(event.target.value)} onKeyDown={(event: { key: string }) => { if (event.key === 'Enter') void submit(); if (event.key === 'Escape') setAdding(false) }} placeholder={t('tasks.quickAdd')} />}
-    <div className="task-list">{tasks.map((task) => <TaskRow key={task.id} task={task} hasLinkedNotes={linkedTaskIds.has(task.id)} onComplete={() => onComplete(task)} onRestore={() => onRestore(task)} onMove={() => onMove(task)} onPriority={(priority) => onPriority(task, priority)} />)}</div>
+    <div className="task-list" translate="no">{tasks.map((task) => <TaskRow key={task.id} task={task} hasLinkedNotes={linkedTaskIds.has(task.id)} onComplete={() => onComplete(task)} onRestore={() => onRestore(task)} onMove={() => onMove(task)} onPriority={(priority) => onPriority(task, priority)} />)}</div>
   </section>
 }
 
