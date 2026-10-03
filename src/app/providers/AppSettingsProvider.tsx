@@ -10,11 +10,13 @@ interface AppSettingsContextValue {
   accentColor: AccentColor
   priorityAgingEnabled: boolean
   priorityAgingIntervalDays: number
+  showHabitsOnDashboard: boolean
   setLanguage: (language: Language) => void
   setTheme: (theme: Theme) => void
   setAccentColor: (accentColor: AccentColor) => void
   setPriorityAgingEnabled: (enabled: boolean) => void
   setPriorityAgingIntervalDays: (days: number) => void
+  setShowHabitsOnDashboard: (show: boolean) => void
 }
 
 const AppSettingsContext = createContext<AppSettingsContextValue | null>(null)
@@ -27,7 +29,7 @@ export function AppSettingsProvider({ children }: { children: ReactNode }) {
     void db.settings.get('app').then((stored) => {
       const next = { ...defaultSettings, ...stored }
       setSettings(next)
-      if (!stored || stored.accentColor === undefined || stored.priorityAgingEnabled === undefined || stored.priorityAgingIntervalDays === undefined) void db.settings.put(next)
+      if (!stored || stored.accentColor === undefined || stored.priorityAgingEnabled === undefined || stored.priorityAgingIntervalDays === undefined || stored.showHabitsOnDashboard === undefined) void db.settings.put(next)
       void i18n.changeLanguage(next.language)
     })
   }, [i18n])
@@ -52,11 +54,13 @@ export function AppSettingsProvider({ children }: { children: ReactNode }) {
     accentColor: settings.accentColor,
     priorityAgingEnabled: settings.priorityAgingEnabled,
     priorityAgingIntervalDays: settings.priorityAgingIntervalDays,
+    showHabitsOnDashboard: settings.showHabitsOnDashboard,
     setLanguage: (language: Language) => { void i18n.changeLanguage(language); update({ language }) },
     setTheme: (theme: Theme) => update({ theme }),
     setAccentColor: (accentColor: AccentColor) => update({ accentColor }),
     setPriorityAgingEnabled: (priorityAgingEnabled: boolean) => update({ priorityAgingEnabled }),
     setPriorityAgingIntervalDays: (priorityAgingIntervalDays: number) => update({ priorityAgingIntervalDays }),
+    setShowHabitsOnDashboard: (showHabitsOnDashboard: boolean) => update({ showHabitsOnDashboard }),
   }), [settings, i18n])
 
   return <AppSettingsContext.Provider value={value}>{children}</AppSettingsContext.Provider>

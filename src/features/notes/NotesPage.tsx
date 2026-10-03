@@ -30,7 +30,7 @@ export function NotesPage() {
   return <section className="notes-page"><div className="notes-heading"><div><p className="eyebrow"><DotiBrand /></p><h1>{t('navigation.notes')}</h1></div><button className="add-button" aria-label={t('notes.addTitle')} onClick={() => setCreating(true)}><Plus aria-hidden="true" /></button></div>
     {creating && <input autoFocus className="note-create-input" value={title} onChange={(event: { target: HTMLInputElement }) => setTitle(event.target.value)} onKeyDown={(event: { key: string }) => { if (event.key === 'Enter') void submit(); if (event.key === 'Escape') { setTitle(''); setCreating(false) } }} placeholder={t('notes.untitled')} />}
     <div className="notes-search-wrap"><Search className="notes-search-icon" aria-hidden="true" /><input className="notes-search" value={query} onChange={(event: { target: HTMLInputElement }) => setQuery(event.target.value)} placeholder={t('notes.search')} aria-label={t('notes.search')} /></div>
-    <div className="notes-list">{filtered.map((note) => <NoteRow key={note.id} note={note} locale={i18n.language} onClick={() => navigate(`/notes/${note.id}`)} />)}</div>
+    <div className="notes-list" translate="no">{filtered.map((note) => <NoteRow key={note.id} note={note} locale={i18n.language} onClick={() => navigate(`/notes/${note.id}`)} />)}</div>
     {!notes.length && !creating && <p className="notes-empty">{t('notes.empty')}</p>}
     {notes.length > 0 && !filtered.length && <p className="notes-empty">{t('notes.noResults')}</p>}
   </section>

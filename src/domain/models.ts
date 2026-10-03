@@ -5,6 +5,26 @@ export type AccentColor = 'blue' | 'purple' | 'pink' | 'green' | 'orange' | 'tea
 export type TaskStatus = 'active' | 'completed' | 'archived'
 export type TaskBucket = 'today' | 'later'
 export type PriorityLevel = 1 | 2 | 3 | 4
+export type HabitFrequency = 'daily' | 'weekdays'
+
+export interface Habit {
+  id: EntityId
+  name: string
+  frequency: HabitFrequency
+  weekdays: number[]
+  createdAt: string
+  updatedAt: string
+  deletedAt: string | null
+}
+
+export interface HabitCheck {
+  id: EntityId
+  habitId: EntityId
+  date: string
+  createdAt: string
+  updatedAt: string
+  deletedAt: string | null
+}
 
 export interface Task {
   id: EntityId
@@ -56,5 +76,6 @@ export interface Settings {
   accentColor: AccentColor
   priorityAgingEnabled: boolean
   priorityAgingIntervalDays: number
+  showHabitsOnDashboard: boolean
   updatedAt: string
 }

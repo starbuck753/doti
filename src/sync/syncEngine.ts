@@ -53,7 +53,10 @@ export class SyncEngine {
           const table = tableFor(entityType)
           const local = await table.get(remote.id) as SyncRecord | undefined
           if (!local || isNewer(remote, local)) {
-            await table.put(remote)
+            const next = entityType === 'settings'
+              ? { ...remote, showHabitsOnDashboard: (local as Settings | undefined)?.showHabitsOnDashboard ?? true }
+              : remote
+            await table.put(next)
             await db.syncMeta.put({ entityType, entityId: remote.id, lastSyncedLocalUpdatedAt: remote.updatedAt })
           }
         }

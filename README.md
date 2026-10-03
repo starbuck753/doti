@@ -31,7 +31,7 @@ A task contains:
 - Completion state
 - Linked notes
 
-Tasks do not contain long descriptions or embedded notes.
+Tasks have no Description or Markdown content. Detailed information belongs in linked Notes.
 
 If a task requires additional information, it can be linked to one or
 more Notes.
@@ -114,6 +114,13 @@ Current settings include:
 - Language: English / Spanish
 - Priority Aging
 - Aging Interval
+- Show Habits on Dashboard (visibility only; data remains stored when hidden)
+
+### Habits
+
+Doti includes a simple local Habit tracker on the Dashboard. Habits can repeat every day or on selected weekdays. Dashboard visibility is optional, and hiding the section never removes habit data. Habit checks use the local calendar date. Habits are local-only in Phase 13A and are not included in Supabase Sync. No history screen, statistics, or streaks are included yet.
+
+Internally, weekday numbers follow JavaScript's local convention: 0 is Sunday through 6 for Saturday. Weekday controls are presented Monday first.
 
 ### Backup & Restore
 
@@ -124,6 +131,7 @@ Backups include:
 - Notes
 - Birthdays
 - Task/Note links
+- Habits and Habit Checks
 - Settings
 
 Restore currently uses full replacement rather than merge.
@@ -136,7 +144,7 @@ Structure:
 
 - Today
 - Later
-- Habits (planned)
+- Habits (optional Dashboard section)
 - Upcoming Birthdays
 - Bottom navigation
 
@@ -160,6 +168,8 @@ Task
 Note
 Birthday
 TaskNoteLink
+Habit
+HabitCheck
 Settings
 
 Data is stored locally using IndexedDB through Dexie.
@@ -175,7 +185,7 @@ i18next
 Markdown rendering
 PWA
 
-Doti is local-first and currently requires no backend.
+Doti is local-first. Supabase Sync is optional for Tasks, Notes, Birthdays, and Settings; Habits and Habit Checks remain local-only until Phase 13B.
 
 ## PWA
 
@@ -218,27 +228,7 @@ Potential future features:
 
 ### Habits
 
-A deliberately simple habit tracker.
-
-Initial concept:
-- Habit name
-- Daily or selected weekdays
-- Check/uncheck for today
-- Small Dashboard section
-- Optional dedicated page later
-
-The goal is to avoid:
-- gamification
-- complex goals
-- excessive statistics
-- project-management style configuration
-
-### Sync
-
-Future synchronization between Windows and Android.
-
-The current local-first architecture is intentionally designed so a sync
-layer can be added later.
+Phase 13B will add optional Supabase synchronization for Habits and Habit Checks. A dedicated Habits destination may be considered later.
 
 ### Android
 
@@ -267,7 +257,7 @@ Birthdays answer:
 
 "What important date is coming?"
 
-Future Habits should answer:
+Habits answer:
 
 "What do I want to keep doing?"
 

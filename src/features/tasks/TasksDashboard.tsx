@@ -9,6 +9,7 @@ import { getEffectivePriority, sortTasksForDashboard } from './taskUtils'
 import { useTasks } from './useTasks'
 import { UpcomingBirthdays } from '../birthdays/BirthdaysPage'
 import { useTaskLinkIndicators } from '../links/useTaskNoteLinks'
+import { HabitsSection } from '../habits/HabitsSection'
 
 const priorityColors = { 1: 'priority-green', 2: 'priority-yellow', 3: 'priority-orange', 4: 'priority-red' } as const
 
@@ -86,6 +87,7 @@ export function TasksDashboard() {
       <TaskSection bucket="today" tasks={sorted.filter((task) => task.bucket === 'today')} linkedTaskIds={taskIdsWithNotes} onAdd={(title) => addTask(title, 'today')} onComplete={completeTask} onRestore={restoreTask} onMove={(task) => moveTask(task, 'later')} onPriority={changePriority} />
       <TaskSection bucket="later" tasks={sorted.filter((task) => task.bucket === 'later')} linkedTaskIds={taskIdsWithNotes} onAdd={(title) => addTask(title, 'later')} onComplete={completeTask} onRestore={restoreTask} onMove={(task) => moveTask(task, 'today')} onPriority={changePriority} />
     </div>
+    {settings.showHabitsOnDashboard && <HabitsSection />}
     <UpcomingBirthdays />
   </section>
 }
