@@ -18,7 +18,7 @@ export const supabaseAuthProvider: AuthProvider = {
   },
   async signUp(email, password) {
     if (!supabase) throw new Error('Supabase is not configured')
-    const { data, error } = await supabase.auth.signUp({ email, password })
+    const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: 'https://starbuck753.github.io/doti/', } })
     if (error) throw error
     return { user: toUser(data.user), needsEmailConfirmation: !data.session }
   },
