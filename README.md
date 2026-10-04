@@ -1,7 +1,7 @@
 # Doti
 
-Doti is a minimal, local-first personal organizer for tasks, notes
-and birthdays.
+Doti is a minimal, local-first personal organizer for tasks, notes,
+birthdays, and habits.
 
 Its goal is to keep everyday organization simple while providing a few
 smart features, such as automatic task priority aging.
@@ -31,7 +31,8 @@ A task contains:
 - Completion state
 - Linked notes
 
-Tasks do not contain long descriptions or embedded notes.
+Tasks do not contain descriptions or embedded notes. Additional information
+belongs in Notes linked to the task.
 
 If a task requires additional information, it can be linked to one or
 more Notes.
@@ -106,6 +107,20 @@ Visual proximity:
 
 The Dashboard displays the next three birthdays.
 
+### Habits
+
+Habits are a deliberately simple, local-only tracker. The optional
+Dashboard section shows today's scheduled habits in compact tinted rows
+with a selectable icon and color. Tap the row to open Habit Detail; use
+the control on the right to check or uncheck today.
+
+Habits repeat every day or on selected weekdays (Sunday is weekday 0;
+Monday is 1 through Saturday 6 internally). A habit starts on its local
+creation date. Checks are stored by local calendar date and retained as
+history when unchecked or when the habit is deleted. There is no history,
+streak, or statistics UI yet. Habit data is not synchronized in Phase 13A;
+Supabase support is deferred to Phase 13B.
+
 ### Settings
 
 Current settings include:
@@ -114,6 +129,7 @@ Current settings include:
 - Language: English / Spanish
 - Priority Aging
 - Aging Interval
+- Show Habits on Dashboard
 
 ### Backup & Restore
 
@@ -124,6 +140,7 @@ Backups include:
 - Notes
 - Birthdays
 - Task/Note links
+- Habits and HabitChecks
 - Settings
 
 Restore currently uses full replacement rather than merge.
@@ -136,7 +153,7 @@ Structure:
 
 - Today
 - Later
-- Habits (planned)
+- Habits (optional, controlled in Settings)
 - Upcoming Birthdays
 - Bottom navigation
 
@@ -160,6 +177,8 @@ Task
 Note
 Birthday
 TaskNoteLink
+Habit
+HabitCheck
 Settings
 
 Data is stored locally using IndexedDB through Dexie.
@@ -216,23 +235,6 @@ Only the public anon key belongs in the browser build. Never add a Supabase serv
 
 Potential future features:
 
-### Habits
-
-A deliberately simple habit tracker.
-
-Initial concept:
-- Habit name
-- Daily or selected weekdays
-- Check/uncheck for today
-- Small Dashboard section
-- Optional dedicated page later
-
-The goal is to avoid:
-- gamification
-- complex goals
-- excessive statistics
-- project-management style configuration
-
 ### Sync
 
 Future synchronization between Windows and Android.
@@ -267,7 +269,7 @@ Birthdays answer:
 
 "What important date is coming?"
 
-Future Habits should answer:
+Habits answer:
 
 "What do I want to keep doing?"
 
@@ -282,3 +284,5 @@ Doti is currently not intended to provide:
 - Team collaboration
 - Rich-text documents
 - Advanced habit gamification
+
+Habits remain local-only until Phase 13B adds optional synchronization.

@@ -1,5 +1,5 @@
 import Dexie, { type EntityTable, type Table } from 'dexie'
-import type { Birthday, Note, Settings, Task, TaskNoteLink } from '../domain/models'
+import type { Birthday, Habit, HabitCheck, Note, Settings, Task, TaskNoteLink } from '../domain/models'
 import type { SyncMeta, SyncState } from '../sync/types'
 
 export class DotiDatabase extends Dexie {
@@ -8,6 +8,8 @@ export class DotiDatabase extends Dexie {
   birthdays!: EntityTable<Birthday, 'id'>
   taskNoteLinks!: EntityTable<TaskNoteLink, 'id'>
   settings!: EntityTable<Settings, 'id'>
+  habits!: EntityTable<Habit, 'id'>
+  habitChecks!: EntityTable<HabitCheck, 'id'>
   syncState!: EntityTable<SyncState, 'id'>
   syncMeta!: Table<SyncMeta, [string, string]>
 
@@ -95,6 +97,32 @@ export class DotiDatabase extends Dexie {
     }).upgrade((transaction) => transaction.table('taskNoteLinks').toCollection().modify((link) => {
       link.updatedAt ??= link.deletedAt ?? link.createdAt ?? new Date().toISOString()
     }))
+    this.version(8).stores({
+      tasks: 'id, status, bucket, priorityBase, dueDate, createdAt, updatedAt, deletedAt',
+      notes: 'id, createdAt, updatedAt, deletedAt',
+      birthdays: 'id, month, day, name, updatedAt, deletedAt',
+      taskNoteLinks: 'id, taskId, noteId, updatedAt, deletedAt, [taskId+noteId]',
+      settings: 'id, updatedAt',
+      syncState: 'id, currentUserId, lastPullCursor',
+      syncMeta: '[entityType+entityId], entityType, entityId, lastSyncedLocalUpdatedAt',
+      habits: 'id, createdAt, updatedAt, deletedAt',
+      habitChecks: 'id, habitId, date, [habitId+date], updatedAt, deletedAt',
+    }).upgrade((transaction) => transaction.table('settings').toCollection().modify((settings) => {
+      settings.showHabitsOnDashboard ??= true
+    }))
+    this.version(9).stores({
+      tasks: 'id, status, bucket, priorityBase, dueDate, createdAt, updatedAt, deletedAt',
+      notes: 'id, createdAt, updatedAt, deletedAt',
+      birthdays: 'id, month, day, name, updatedAt, deletedAt',
+      taskNoteLinks: 'id, taskId, noteId, updatedAt, deletedAt, [taskId+noteId]',
+      settings: 'id, updatedAt',
+      syncState: 'id, currentUserId, lastPullCursor',
+      syncMeta: '[entityType+entityId], entityType, entityId, lastSyncedLocalUpdatedAt',
+      habits: 'id, createdAt, updatedAt, deletedAt',
+      habitChecks: 'id, habitId, date, [habitId+date], updatedAt, deletedAt',
+    }).upgrade((transaction) => transaction.table('habits').toCollection().modify((habit) => {
+      if (habit.icon === 'circle-check-big') habit.icon = 'circle-checked-big'
+    }))
   }
 }
 
@@ -107,5 +135,6 @@ export const defaultSettings: Settings = {
   accentColor: 'green',
   priorityAgingEnabled: true,
   priorityAgingIntervalDays: 7,
+  showHabitsOnDashboard: true,
   updatedAt: new Date().toISOString(),
 }

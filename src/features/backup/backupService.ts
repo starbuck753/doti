@@ -1,5 +1,5 @@
 import { db, defaultSettings } from '../../data/db'
-import type { Birthday, Note, Settings, Task, TaskNoteLink } from '../../domain/models'
+import type { Birthday, Habit, HabitCheck, Note, Settings, Task, TaskNoteLink } from '../../domain/models'
 import { resetSyncMetadata } from '../../sync/localSyncState'
 
 export const DotiBackupVersion = 1 as const
@@ -9,7 +9,7 @@ export interface DotiBackupV1 {
   format: typeof BACKUP_FORMAT
   version: typeof DotiBackupVersion
   exportedAt: string
-  data: { tasks: Task[]; notes: Note[]; birthdays: Birthday[]; taskNoteLinks: TaskNoteLink[]; settings: Settings }
+  data: { tasks: Task[]; notes: Note[]; birthdays: Birthday[]; taskNoteLinks: TaskNoteLink[]; habits: Habit[]; habitChecks: HabitCheck[]; settings: Settings }
 }
 
 export class BackupValidationError extends Error {
@@ -50,7 +50,20 @@ function normalizeLink(value: unknown, exportedAt: string): TaskNoteLink {
 function normalizeSettings(value: unknown): Settings {
   if (!isRecord(value) || value.id !== 'app' || (value.language !== 'en' && value.language !== 'es') || !['system', 'light', 'dark'].includes(value.theme as string) || typeof value.priorityAgingEnabled !== 'boolean' || !requiredNumber(value, 'priorityAgingIntervalDays')) throw new BackupValidationError('Invalid settings record')
   const accentColor = ['blue', 'purple', 'pink', 'green', 'orange', 'teal'].includes(value.accentColor as string) ? value.accentColor : defaultSettings.accentColor
-  return { id: 'app', language: value.language as Settings['language'], theme: value.theme as Settings['theme'], accentColor: accentColor as Settings['accentColor'], priorityAgingEnabled: value.priorityAgingEnabled, priorityAgingIntervalDays: value.priorityAgingIntervalDays as number, updatedAt: typeof value.updatedAt === 'string' ? value.updatedAt : new Date().toISOString() }
+  return { id: 'app', language: value.language as Settings['language'], theme: value.theme as Settings['theme'], accentColor: accentColor as Settings['accentColor'], priorityAgingEnabled: value.priorityAgingEnabled, priorityAgingIntervalDays: value.priorityAgingIntervalDays as number, showHabitsOnDashboard: typeof value.showHabitsOnDashboard === 'boolean' ? value.showHabitsOnDashboard : true, updatedAt: typeof value.updatedAt === 'string' ? value.updatedAt : new Date().toISOString() }
+}
+
+const habitIcons = ['circle-checked-big', 'circle-check-big', 'sparkles', 'heart', 'book', 'activity', 'dumbbell', 'footprints', 'glass-water', 'moon', 'sun', 'coffee', 'leaf', 'brain', 'apple', 'bed', 'music', 'pencil']
+const habitColors = ['neutral', 'blue', 'purple', 'pink', 'green', 'orange', 'teal']
+function normalizeHabit(value: unknown): Habit {
+  if (!isRecord(value) || !requiredString(value, 'id') || !requiredString(value, 'name') || !requiredString(value, 'createdAt') || !requiredString(value, 'updatedAt')) throw new BackupValidationError('Invalid habit record')
+  if (!habitIcons.includes(value.icon as string) || !habitColors.includes(value.color as string) || !['daily', 'weekdays'].includes(value.frequency as string) || !Array.isArray(value.weekdays) || value.weekdays.some((day) => !Number.isInteger(day) || (day as number) < 0 || (day as number) > 6) || (value.frequency === 'weekdays' && value.weekdays.length === 0)) throw new BackupValidationError('Invalid habit settings')
+  const icon = value.icon === 'circle-check-big' ? 'circle-checked-big' : value.icon as Habit['icon']
+  return { id: value.id as string, name: (value.name as string).trim(), icon, color: value.color as Habit['color'], frequency: value.frequency as Habit['frequency'], weekdays: [...new Set(value.weekdays as number[])], createdAt: value.createdAt as string, updatedAt: value.updatedAt as string, deletedAt: typeof value.deletedAt === 'string' ? value.deletedAt : null }
+}
+function normalizeHabitCheck(value: unknown): HabitCheck {
+  if (!isRecord(value) || !requiredString(value, 'id') || !requiredString(value, 'habitId') || !/^\d{4}-\d{2}-\d{2}$/.test(String(value.date)) || !requiredString(value, 'createdAt') || !requiredString(value, 'updatedAt')) throw new BackupValidationError('Invalid habit check record')
+  return { id: value.id as string, habitId: value.habitId as string, date: value.date as string, createdAt: value.createdAt as string, updatedAt: value.updatedAt as string, deletedAt: typeof value.deletedAt === 'string' ? value.deletedAt : null }
 }
 
 export function validateBackup(value: unknown): DotiBackupV1 {
@@ -63,15 +76,19 @@ export function validateBackup(value: unknown): DotiBackupV1 {
   const notes = data.notes.map(normalizeNote)
   const birthdays = data.birthdays.map(normalizeBirthday)
   const taskNoteLinks = data.taskNoteLinks.map((link) => normalizeLink(link, value.exportedAt as string))
+  const habits = Array.isArray(data.habits) ? data.habits.map(normalizeHabit) : []
+  const habitChecks = Array.isArray(data.habitChecks) ? data.habitChecks.map(normalizeHabitCheck) : []
   const taskIds = new Set(tasks.map((task) => task.id))
   const noteIds = new Set(notes.map((note) => note.id))
   if (taskNoteLinks.some((link) => link.deletedAt === null && (!taskIds.has(link.taskId) || !noteIds.has(link.noteId)))) throw new BackupValidationError('Invalid active task-note link')
-  return { format: BACKUP_FORMAT, version: DotiBackupVersion, exportedAt: value.exportedAt as string, data: { tasks, notes, birthdays, taskNoteLinks, settings: normalizeSettings(data.settings) } }
+  const habitIds = new Set(habits.map((habit) => habit.id))
+  if (habitChecks.some((check) => !habitIds.has(check.habitId))) throw new BackupValidationError('Invalid habit check reference')
+  return { format: BACKUP_FORMAT, version: DotiBackupVersion, exportedAt: value.exportedAt as string, data: { tasks, notes, birthdays, taskNoteLinks, habits, habitChecks, settings: normalizeSettings(data.settings) } }
 }
 
 export async function createBackup(): Promise<DotiBackupV1> {
-  const [tasks, notes, birthdays, taskNoteLinks, storedSettings] = await Promise.all([db.tasks.toArray(), db.notes.toArray(), db.birthdays.toArray(), db.taskNoteLinks.toArray(), db.settings.get('app')])
-  return { format: BACKUP_FORMAT, version: DotiBackupVersion, exportedAt: new Date().toISOString(), data: { tasks, notes, birthdays, taskNoteLinks, settings: storedSettings ?? defaultSettings } }
+  const [tasks, notes, birthdays, taskNoteLinks, habits, habitChecks, storedSettings] = await Promise.all([db.tasks.toArray(), db.notes.toArray(), db.birthdays.toArray(), db.taskNoteLinks.toArray(), db.habits.toArray(), db.habitChecks.toArray(), db.settings.get('app')])
+  return { format: BACKUP_FORMAT, version: DotiBackupVersion, exportedAt: new Date().toISOString(), data: { tasks, notes, birthdays, taskNoteLinks, habits, habitChecks, settings: { ...defaultSettings, ...storedSettings } } }
 }
 
 export function downloadBackup(backup: DotiBackupV1) {
@@ -86,8 +103,10 @@ export function downloadBackup(backup: DotiBackupV1) {
 }
 
 export async function restoreBackup(backup: DotiBackupV1) {
-  await db.transaction('rw', db.tasks, db.notes, db.birthdays, db.taskNoteLinks, db.settings, async () => {
+  await db.transaction('rw', [db.tasks, db.notes, db.birthdays, db.taskNoteLinks, db.habits, db.habitChecks, db.settings], async () => {
     await db.taskNoteLinks.clear()
+    await db.habitChecks.clear()
+    await db.habits.clear()
     await db.tasks.clear()
     await db.notes.clear()
     await db.birthdays.clear()
@@ -95,6 +114,8 @@ export async function restoreBackup(backup: DotiBackupV1) {
     await db.notes.bulkAdd(backup.data.notes)
     await db.birthdays.bulkAdd(backup.data.birthdays)
     await db.taskNoteLinks.bulkAdd(backup.data.taskNoteLinks)
+    if (backup.data.habits.length) await db.habits.bulkAdd(backup.data.habits)
+    if (backup.data.habitChecks.length) await db.habitChecks.bulkAdd(backup.data.habitChecks)
     await db.settings.clear()
     await db.settings.add(backup.data.settings)
   })

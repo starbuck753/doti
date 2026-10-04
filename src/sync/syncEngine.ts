@@ -53,7 +53,11 @@ export class SyncEngine {
           const table = tableFor(entityType)
           const local = await table.get(remote.id) as SyncRecord | undefined
           if (!local || isNewer(remote, local)) {
-            await table.put(remote)
+            // Dashboard visibility is a local presentation preference, not shared sync data.
+            const value = entityType === 'settings'
+              ? { ...remote, showHabitsOnDashboard: (local as Settings | undefined)?.showHabitsOnDashboard ?? true }
+              : remote
+            await table.put(value)
             await db.syncMeta.put({ entityType, entityId: remote.id, lastSyncedLocalUpdatedAt: remote.updatedAt })
           }
         }

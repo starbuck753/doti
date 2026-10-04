@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build && node scripts/copy-404.mjs",
+    "test:habits": "node --experimental-strip-types --test tests/habits.test.ts",
     "preview": "vite preview"
   },
   "dependencies": {

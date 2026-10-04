@@ -36,7 +36,7 @@ function linkFrom(row: Row): TaskNoteLink | null {
 function settingsFrom(row: Row): Settings | null {
   const updatedAt = text(row, 'updated_at') ?? new Date().toISOString(); const language = text(row, 'language'); const theme = text(row, 'theme'); const accentColor = text(row, 'accent_color'); const priorityAgingEnabled = boolean(row, 'priority_aging_enabled'); const priorityAgingIntervalDays = number(row, 'priority_aging_interval_days')
   if (!['en', 'es'].includes(language ?? '') || !['system', 'light', 'dark'].includes(theme ?? '') || !['blue', 'purple', 'pink', 'green', 'orange', 'teal'].includes(accentColor ?? '') || priorityAgingEnabled === null || priorityAgingIntervalDays === null) return null
-  return { id: 'app', language: language as Settings['language'], theme: theme as Settings['theme'], accentColor: accentColor as Settings['accentColor'], priorityAgingEnabled, priorityAgingIntervalDays, updatedAt }
+  return { id: 'app', language: language as Settings['language'], theme: theme as Settings['theme'], accentColor: accentColor as Settings['accentColor'], priorityAgingEnabled, priorityAgingIntervalDays, showHabitsOnDashboard: true, updatedAt }
 }
 
 function taskRow(userId: string, task: Task) { return { user_id: userId, id: task.id, title: task.title, status: task.status, bucket: task.bucket, priority_base: task.priorityBase, priority_aging_started_at: task.priorityAgingStartedAt, description: task.description, due_date: task.dueDate, completed_at: task.completedAt, created_at: task.createdAt, updated_at: task.updatedAt, deleted_at: task.deletedAt } }
