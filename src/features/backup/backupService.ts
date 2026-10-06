@@ -53,7 +53,7 @@ function normalizeSettings(value: unknown): Settings {
   return { id: 'app', language: value.language as Settings['language'], theme: value.theme as Settings['theme'], accentColor: accentColor as Settings['accentColor'], priorityAgingEnabled: value.priorityAgingEnabled, priorityAgingIntervalDays: value.priorityAgingIntervalDays as number, showHabitsOnDashboard: typeof value.showHabitsOnDashboard === 'boolean' ? value.showHabitsOnDashboard : true, updatedAt: typeof value.updatedAt === 'string' ? value.updatedAt : new Date().toISOString() }
 }
 
-const habitIcons = ['circle-checked-big', 'circle-check-big', 'circle', 'sparkles', 'sun', 'leaf', 'heart', 'brain', 'footprints', 'dumbbell', 'glass-water', 'coffee', 'apple', 'bed', 'book-open-text', 'book', 'activity', 'gamepad2', 'music', 'mail', 'notebook-pen', 'credit-card', 'moon', 'pencil']
+const habitIcons = ['circle-checked-big', 'circle-check-big', 'circle', 'sparkles', 'sun', 'leaf', 'plant-pot', 'paw-print', 'footprints', 'dumbbell', 'biceps-flexed', 'heart', 'brain', 'bed', 'glass-water', 'coffee', 'apple', 'carrot', 'popcorn', 'shopping-cart', 'book-open-text', 'book', 'activity', 'gamepad2', 'music', 'mail', 'notebook-pen', 'credit-card', 'moon', 'pencil']
 const habitColors = ['neutral', 'blue', 'purple', 'pink', 'green', 'orange', 'teal']
 function normalizeHabit(value: unknown): Habit {
   if (!isRecord(value) || !requiredString(value, 'id') || !requiredString(value, 'name') || !requiredString(value, 'createdAt') || !requiredString(value, 'updatedAt')) throw new BackupValidationError('Invalid habit record')

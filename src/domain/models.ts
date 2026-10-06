@@ -7,7 +7,7 @@ export type TaskBucket = 'today' | 'later'
 export type PriorityLevel = 1 | 2 | 3 | 4
 export type HabitFrequency = 'daily' | 'weekdays'
 export type HabitColor = 'neutral' | 'blue' | 'purple' | 'pink' | 'green' | 'orange' | 'teal'
-export type HabitIcon = 'circle-checked-big' | 'sparkles' | 'sun' | 'leaf' | 'heart' | 'brain' | 'footprints' | 'dumbbell' | 'glass-water' | 'coffee' | 'apple' | 'bed' | 'book-open-text' | 'gamepad2' | 'music' | 'mail' | 'notebook-pen' | 'credit-card'
+export type HabitIcon = 'circle-checked-big' | 'sparkles' | 'sun' | 'leaf' | 'plant-pot' | 'paw-print' | 'footprints' | 'dumbbell' | 'biceps-flexed' | 'heart' | 'brain' | 'bed' | 'glass-water' | 'coffee' | 'apple' | 'carrot' | 'popcorn' | 'shopping-cart' | 'book-open-text' | 'gamepad2' | 'music' | 'mail' | 'notebook-pen' | 'credit-card'
 
 export interface Task {
   id: EntityId

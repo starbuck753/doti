@@ -1346,38 +1346,57 @@ input.link-picker-search:focus-visible { outline: none !important; }
   font-size: var(--font-size-lg);
   font-weight: 700;
 }
+.habit-see-all { color: var(--accent); font-size: var(--font-size-sm); font-weight: 650; text-decoration: none; }
 .habit-list { display: grid; gap: 0.55rem; padding: 0.55rem 0.65rem; }
 .habit-row { 
-  min-height: 2.6rem; 
-  display: flex; 
-  align-items: center; 
-  gap: 0.2rem; 
-  padding: 0.12rem 0.35rem 0.12rem 0.75rem; 
+  width: 100%; min-height: 2rem;
+  display: flex; align-items: center; gap: 0.65rem;
+  padding: 0.25rem 0.65rem 0.25rem 0.75rem;
   border-radius: 0.85rem; 
-  background: var(--habit-bg); color: var(--color-text); 
+  border: 0; background: var(--habit-bg); color: var(--color-text); text-align: left; cursor: pointer;
+  transition: background-color 140ms ease, opacity 140ms ease;
 }
-.habit-main { 
-  flex: 1; 
-  min-width: 0; 
-  min-height: 1.8rem; 
-  display: flex; 
-  align-items: center; 
-  gap: 0.7rem;
-  padding: 0; 
-  border: 0; 
-  background: transparent; 
-  color: inherit; 
-  text-align: left; 
-  font-size: 0.8rem; 
-  font-weight: 550; 
-}
-
-.habit-main span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.habit-row:focus-visible, .habit-see-all:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.habit-row-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.8rem; font-weight: 550; }
 .habit-row-icon { width: 1.1rem; height: 1.1rem; flex: none; color: var(--habit-ink); }
-.habit-completion { width: 2.2rem; height: 2rem; flex: none; display: grid; place-items: center; border: 0; border-radius: 50%; color: var(--color-text-muted); background: transparent; }
-.habit-completion svg { width: 0.9rem; height: 0.9rem; }
-.habit-completion.checked { color: var(--habit-ink); text-decoration: line-through;}
+.habit-status { width: 1.5rem; height: 1.5rem; flex: none; display: grid; place-items: center; color: var(--color-text-muted); }
+.habit-status svg { width: 1rem; height: 1rem; }
+.habit-status.checked { border-color: transparent; color: var(--habit-ink); }
+.habit-row.checked .habit-row-name { color: var(--color-text-muted); text-decoration: line-through; }
 .habit-empty { margin: 0; padding: 0.35rem 0.7rem; color: var(--color-text-muted); font-size: var(--font-size-sm); }
+.habits-page { width: min(100%, 42rem); margin: 0 auto; display: grid; gap: 1.25rem; }
+.habits-page-heading { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 0.25rem 0.75rem; }
+.habits-page-heading .back-link { grid-column: 1 / -1; justify-self: start; }
+.habits-page-heading h1 { margin: 0; font-size: var(--font-size-xl); }
+.habits-page-heading .add-button { justify-self: end; }
+.habit-create-form { display: flex; gap: 0.5rem; }
+.habit-create-form .quick-add { flex: 1; min-width: 0; }
+.habit-create-form button { min-height: 2.7rem; padding: 0.4rem 0.8rem; border: 0; border-radius: var(--radius-md); background: var(--accent); color: white; font-weight: 650; }
+.habit-create-form button:disabled { opacity: 0.5; }
+.habits-empty { margin: 0; padding: 0.4rem 0; color: var(--color-text-muted); }
+.habit-week-section, .habit-management { min-width: 0; }
+.habit-week-section h2, .habit-management h2 { margin: 0 0 0.65rem; color: var(--color-text-muted); font-size: var(--font-size-sm); letter-spacing: 0.08em; text-transform: uppercase; }
+.habit-week-grid { display: grid; gap: 0.3rem; }
+.habit-week-header, .habit-week-row { display: grid; grid-template-columns: minmax(5rem, 1fr) repeat(7, minmax(1.45rem, 2rem)); align-items: center; gap: clamp(0.05rem, 1vw, 0.25rem); }
+.habit-week-header { color: var(--color-text-muted); font-size: 0.7rem; font-weight: 650; text-align: center; }
+.habit-week-header > span { min-height: 1.8rem; display: grid; place-items: center; border-radius: 0.45rem; }
+.habit-week-header .is-today { background: var(--accent-soft); color: var(--accent); }
+.habit-week-name { display: flex; align-items: center; min-width: 0; gap: 0.35rem; color: var(--habit-ink); font-size: 0.78rem; }
+.habit-week-name svg { width: 0.95rem; height: 0.95rem; flex: none; }
+.habit-week-name span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.habit-week-cell { width: 1.45rem; height: 1.7rem; justify-self: center; display: grid; place-items: center; border-radius: 0.45rem; color: var(--color-text-muted); }
+.habit-week-cell svg { width: 0.95rem; height: 0.95rem; }
+.habit-week-cell.state-completed { color: var(--accent); }
+.habit-week-cell.state-missed { color: var(--color-text-muted); opacity: 0.75; }
+.habit-week-cell.state-not-scheduled { opacity: 0.55; }
+.habit-week-cell.state-future, .habit-week-cell.state-before-created { opacity: 0.25; }
+.habit-week-cell.is-today { background: var(--accent-soft); }
+.habit-management-list { display: grid; }
+.habit-management-row { min-height: 3.3rem; display: flex; align-items: center; gap: 0.75rem; padding: 0.35rem 0.15rem; border-bottom: 1px solid var(--color-border); color: var(--color-text); text-decoration: none; }
+.habit-management-row > span:nth-child(2) { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.habit-management-row > svg { width: 1rem; height: 1rem; color: var(--color-text-muted); }
+.habit-management-icon { width: 2rem; height: 2rem; flex: none; display: grid; place-items: center; border-radius: 0.65rem; color: var(--habit-ink); background: var(--habit-bg); }
+.habit-management-icon svg { width: 1.1rem; height: 1.1rem; }
 .habit-tint-neutral { --habit-bg: color-mix(in srgb, var(--color-text-muted) 8%, var(--color-surface)); --habit-ink: var(--color-text-muted); }
 .habit-tint-blue { --habit-bg: color-mix(in srgb, #4b83d0 12%, var(--color-surface)); --habit-ink: #3970b8; }
 .habit-tint-purple { --habit-bg: color-mix(in srgb, #8666c5 12%, var(--color-surface)); --habit-ink: #7655b3; }
@@ -1421,6 +1440,8 @@ input.link-picker-search:focus-visible { outline: none !important; }
 }
 @media (min-width: 768px) {
   .page-content { padding-top: var(--space-6); }
+  .habit-icon-grid { grid-template-columns: repeat(8, 2.9rem); }
+  .habit-week-grid { width: min(100%, 30rem); }
   .tasks-page {
     display: grid;
     grid-template-columns: minmax(0, 1.55fr) minmax(18rem, 0.85fr);

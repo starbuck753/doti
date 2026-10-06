@@ -10,6 +10,7 @@ import { NotesPage } from '../features/notes/NotesPage'
 import { NoteDetail } from '../features/notes/NoteDetail'
 import { CompletedTasksPage } from '../features/tasks/CompletedTasksPage'
 import { HabitDetail } from '../features/habits/HabitDetail'
+import { HabitsPage } from '../features/habits/HabitsPage'
 import './app.css'
 
 function NavIcon({ type }: { type: 'tasks' | 'birthdays' | 'notes' }) {
@@ -54,6 +55,7 @@ export function App() {
         <Route path="/" element={<TasksDashboard />} />
         <Route path="/tasks" element={<TasksDashboard />} />
         <Route path="/tasks/:taskId" element={<TaskDetail />} />
+        <Route path="/habits" element={<HabitsPage />} />
         <Route path="/habits/:habitId" element={<HabitDetail />} />
         <Route path="/birthdays" element={<BirthdaysPage />} />
         <Route path="/notes" element={<NotesPage />} />

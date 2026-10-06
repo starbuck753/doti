@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Apple, ArrowDown, ArrowUp, Bed, BookOpenText, Brain, Circle, CircleCheck, CircleCheckBig, Coffee, CreditCard, Dumbbell, EllipsisVertical, Footprints, Gamepad2, GlassWater, Heart, Leaf, Mail, Music, NotebookPen, Plus, Sparkles, SquareText, Sun } from 'lucide-react'
+import { Apple, ArrowDown, ArrowUp, Bed, BicepsFlexed, BookOpenText, Brain, Carrot, Circle, CircleCheck, CircleCheckBig, Coffee, CreditCard, Dumbbell, EllipsisVertical, Footprints, Gamepad2, GlassWater, Heart, Leaf, Mail, Music, NotebookPen, PawPrint, PlantPot, Plus, Popcorn, ShoppingCart, Sparkles, SquareText, Sun } from 'lucide-react'
 import { useAppSettings } from '../../app/providers/AppSettingsProvider'
 import { DotiBrand } from '../../app/DotiBrand'
 import type { PriorityLevel, Task, TaskBucket } from '../../domain/models'
@@ -76,20 +76,15 @@ function TaskSection({ bucket, tasks, linkedTaskIds, onAdd, onComplete, onRestor
   </section>
 }
 
-const habitIcons = { 'circle-checked-big': CircleCheckBig, sparkles: Sparkles, sun: Sun, leaf: Leaf, heart: Heart, brain: Brain, footprints: Footprints, dumbbell: Dumbbell, 'glass-water': GlassWater, coffee: Coffee, apple: Apple, bed: Bed, 'book-open-text': BookOpenText, gamepad2: Gamepad2, music: Music, mail: Mail, 'notebook-pen': NotebookPen, 'credit-card': CreditCard } satisfies Record<HabitIcon, typeof Circle>
+const habitIcons = { 'circle-checked-big': CircleCheckBig, sparkles: Sparkles, sun: Sun, leaf: Leaf, 'plant-pot': PlantPot, 'paw-print': PawPrint, footprints: Footprints, dumbbell: Dumbbell, 'biceps-flexed': BicepsFlexed, heart: Heart, brain: Brain, bed: Bed, 'glass-water': GlassWater, coffee: Coffee, apple: Apple, carrot: Carrot, popcorn: Popcorn, 'shopping-cart': ShoppingCart, 'book-open-text': BookOpenText, gamepad2: Gamepad2, music: Music, mail: Mail, 'notebook-pen': NotebookPen, 'credit-card': CreditCard } satisfies Record<HabitIcon, typeof Circle>
 
 function HabitsSection() {
   const { t } = useTranslation()
-  const navigate = useNavigate()
-  const { habits, checks, addHabit, toggle } = useHabits()
-  const [adding, setAdding] = useState(false)
-  const [name, setName] = useState('')
+  const { habits, checks, toggle } = useHabits()
   const today = getLocalDateKey()
   const scheduled = getHabitsForDate(habits, new Date())
-  const submit = async () => { if (!name.trim()) return; await addHabit(name); setName(''); setAdding(false) }
-  return <section className="habit-section"><div className="habit-heading"><h2>{t('habits.title')}</h2><button type="button" className="add-button" aria-label={t('habits.add')} onClick={() => setAdding(true)}><Plus /></button></div>
-    {adding && <input autoFocus className="quick-add" value={name} onChange={(event: { target: HTMLInputElement }) => setName(event.target.value)} onKeyDown={(event: { key: string }) => { if (event.key === 'Enter') void submit(); if (event.key === 'Escape') { setAdding(false); setName('') } }} placeholder={t('habits.quickAdd')} />}
-    {!habits.length ? <p className="habit-empty">{t('habits.empty')}</p> : !scheduled.length ? <p className="habit-empty">{t('habits.noneToday')}</p> : <div className="habit-list">{scheduled.map((habit) => { const Icon = habitIcons[habit.icon]; const complete = isHabitCompletedForDate(checks, habit.id, today); return <div className={`habit-row habit-tint-${habit.color}`} key={habit.id}><button type="button" className="habit-main" onClick={() => navigate(`/habits/${habit.id}`)}><Icon className="habit-row-icon" aria-hidden="true" /><span class={`habit-completion ${complete ? 'checked' : ''}`}>{habit.name}</span></button><button type="button" className={`habit-completion ${complete ? 'checked' : ''}`} aria-label={complete ? t('habits.uncheck', { name: habit.name }) : t('habits.check', { name: habit.name })} aria-pressed={complete} onClick={() => void toggle(habit.id)}>{complete ? <CircleCheck aria-hidden="true" /> : <Circle aria-hidden="true" />}</button></div> })}</div>}
+  return <section className="habit-section"><div className="habit-heading"><h2>{t('habits.title')}</h2><Link className="habit-see-all" to="/habits">{t('habits.seeAll')}</Link></div>
+    {!habits.some((habit) => !habit.deletedAt) ? <p className="habit-empty">{t('habits.empty')}</p> : !scheduled.length ? <p className="habit-empty">{t('habits.noneToday')}</p> : <div className="habit-list">{scheduled.map((habit) => { const Icon = habitIcons[habit.icon] ?? CircleCheckBig; const complete = isHabitCompletedForDate(checks, habit.id, today); return <button type="button" role="checkbox" aria-checked={complete} aria-label={`${habit.name}: ${t(complete ? 'habits.completed' : 'habits.notCompleted')}`} className={`habit-row habit-tint-${habit.color} ${complete ? 'checked' : ''}`} key={habit.id} onClick={() => void toggle(habit.id)}><Icon className="habit-row-icon" aria-hidden="true" /><span className="habit-row-name">{habit.name}</span><span className={`habit-status ${complete ? 'checked' : ''}`} aria-hidden="true">{complete ? <CircleCheck aria-hidden="true" /> : <Circle aria-hidden="true" />}</span></button> })}</div>}
   </section>
 }
 

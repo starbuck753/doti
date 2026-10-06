@@ -9,6 +9,7 @@ export const habitRepository = {
   async list() { return db.habits.toArray() },
   async get(id: string) { return db.habits.get(id) },
   async checksForDate(date = getLocalDateKey()) { return db.habitChecks.where('date').equals(date).toArray() },
+  async checksBetweenDates(start: string, end: string) { return db.habitChecks.where('date').between(start, end, true, true).toArray() },
   async create(name: string) {
     const timestamp = now()
     const habit: Habit = { id: crypto.randomUUID(), name: name.trim(), icon: 'circle-checked-big', color: 'neutral', frequency: 'daily', weekdays: [], createdAt: timestamp, updatedAt: timestamp, deletedAt: null }

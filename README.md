@@ -110,16 +110,23 @@ The Dashboard displays the next three birthdays.
 ### Habits
 
 Habits are a deliberately simple, local-only tracker. The optional
-Dashboard section shows today's scheduled habits in compact tinted rows
-with a selectable icon and color. Tap the row to open Habit Detail; use
-the control on the right to check or uncheck today.
+Dashboard section shows only today's scheduled habits in compact tinted
+rows. Tap anywhere on a row to check or uncheck today's habit. Dashboard
+rows do not create, edit, or open habits; **See all** opens `/habits`.
+
+The `/habits` page is where habits are created and managed. It shows a
+read-only summary for the current Monday-to-Sunday week and a list of all
+active habits. Select a habit to open `/habits/:id`, where its name, icon,
+color, recurrence, and deletion can be managed.
 
 Habits repeat every day or on selected weekdays (Sunday is weekday 0;
 Monday is 1 through Saturday 6 internally). A habit starts on its local
 creation date. Checks are stored by local calendar date and retained as
-history when unchecked or when the habit is deleted. There is no history,
-streak, or statistics UI yet. Habit data is not synchronized in Phase 13A;
-Supabase support is deferred to Phase 13B.
+history when unchecked or when the habit is deleted. The weekly summary
+respects each habit's schedule and creation date; future and inactive days
+are not counted as missed. It has no historical navigation, streaks, or
+statistics. Habit data is not synchronized in Phase 13A; Supabase support
+is deferred to Phase 13B.
 
 ### Settings
 
