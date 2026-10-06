@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Activity, Apple, Bed, BookOpen, Brain, ChevronLeft, Circle, CircleCheckBig, Coffee, Dumbbell, Footprints, Gamepad2, GlassWater, Heart, Leaf, Moon, Music, Pencil, Sparkles, Sun, Trash2 } from 'lucide-react'
+import { Apple, Bed, BookOpenText, Brain, ChevronLeft, Circle, CircleCheckBig, Coffee, CreditCard, Dumbbell, Footprints, Gamepad2, GlassWater, Heart, Leaf, Mail, Music, NotebookPen, Sparkles, Sun, Trash2 } from 'lucide-react'
 import type { Habit, HabitColor, HabitIcon } from '../../domain/models'
 import { habitRepository } from './habitRepository'
 import { getLocalDateKey, isHabitCompletedForDate } from './habitUtils'
 
-const icons = { 'circle-checked-big': CircleCheckBig, sparkles: Sparkles, heart: Heart, book: BookOpen, activity: Activity, dumbbell: Dumbbell, footprints: Footprints, 'glass-water': GlassWater, moon: Moon, sun: Sun, coffee: Coffee, leaf: Leaf, brain: Brain, apple: Apple, bed: Bed, music: Music, gamepad2: Gamepad2, pencil: Pencil } satisfies Record<HabitIcon, typeof Circle>
+const icons = { 'circle-checked-big': CircleCheckBig, sparkles: Sparkles, sun: Sun, leaf: Leaf, heart: Heart, brain: Brain, footprints: Footprints, dumbbell: Dumbbell, 'glass-water': GlassWater, coffee: Coffee, apple: Apple, bed: Bed, 'book-open-text': BookOpenText, gamepad2: Gamepad2, music: Music, mail: Mail, 'notebook-pen': NotebookPen, 'credit-card': CreditCard } satisfies Record<HabitIcon, typeof Circle>
 const colors: HabitColor[] = ['neutral', 'blue', 'purple', 'pink', 'green', 'orange', 'teal']
 
 export function HabitDetail() {

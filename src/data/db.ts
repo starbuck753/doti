@@ -123,6 +123,19 @@ export class DotiDatabase extends Dexie {
     }).upgrade((transaction) => transaction.table('habits').toCollection().modify((habit) => {
       if (habit.icon === 'circle-check-big') habit.icon = 'circle-checked-big'
     }))
+    this.version(10).stores({
+      tasks: 'id, status, bucket, priorityBase, dueDate, createdAt, updatedAt, deletedAt',
+      notes: 'id, createdAt, updatedAt, deletedAt',
+      birthdays: 'id, month, day, name, updatedAt, deletedAt',
+      taskNoteLinks: 'id, taskId, noteId, updatedAt, deletedAt, [taskId+noteId]',
+      settings: 'id, updatedAt',
+      syncState: 'id, currentUserId, lastPullCursor',
+      syncMeta: '[entityType+entityId], entityType, entityId, lastSyncedLocalUpdatedAt',
+      habits: 'id, createdAt, updatedAt, deletedAt',
+      habitChecks: 'id, habitId, date, [habitId+date], updatedAt, deletedAt',
+    }).upgrade((transaction) => transaction.table('habits').toCollection().modify((habit) => {
+      if (['circle', 'book', 'activity', 'moon', 'pencil'].includes(habit.icon)) habit.icon = 'circle-checked-big'
+    }))
   }
 }
 

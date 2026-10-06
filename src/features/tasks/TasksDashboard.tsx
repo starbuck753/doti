@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Activity, Apple, Bed, BookOpen, Brain, ArrowDown, ArrowUp, Circle, CircleCheck, CircleCheckBig, Coffee, Dumbbell, EllipsisVertical, Footprints, Gamepad2, GlassWater, Heart, Leaf, Moon, Music, Pencil, Plus, Sparkles, SquareText, Sun } from 'lucide-react'
+import { Apple, ArrowDown, ArrowUp, Bed, BookOpenText, Brain, Circle, CircleCheck, CircleCheckBig, Coffee, CreditCard, Dumbbell, EllipsisVertical, Footprints, Gamepad2, GlassWater, Heart, Leaf, Mail, Music, NotebookPen, Plus, Sparkles, SquareText, Sun } from 'lucide-react'
 import { useAppSettings } from '../../app/providers/AppSettingsProvider'
 import { DotiBrand } from '../../app/DotiBrand'
 import type { PriorityLevel, Task, TaskBucket } from '../../domain/models'
@@ -76,7 +76,7 @@ function TaskSection({ bucket, tasks, linkedTaskIds, onAdd, onComplete, onRestor
   </section>
 }
 
-const habitIcons = { 'circle-checked-big': CircleCheckBig, sparkles: Sparkles, heart: Heart, book: BookOpen, activity: Activity, dumbbell: Dumbbell, footprints: Footprints, 'glass-water': GlassWater, moon: Moon, sun: Sun, coffee: Coffee, leaf: Leaf, brain: Brain, apple: Apple, bed: Bed, music: Music, gamepad2: Gamepad2, pencil: Pencil } satisfies Record<HabitIcon, typeof Circle>
+const habitIcons = { 'circle-checked-big': CircleCheckBig, sparkles: Sparkles, sun: Sun, leaf: Leaf, heart: Heart, brain: Brain, footprints: Footprints, dumbbell: Dumbbell, 'glass-water': GlassWater, coffee: Coffee, apple: Apple, bed: Bed, 'book-open-text': BookOpenText, gamepad2: Gamepad2, music: Music, mail: Mail, 'notebook-pen': NotebookPen, 'credit-card': CreditCard } satisfies Record<HabitIcon, typeof Circle>
 
 function HabitsSection() {
   const { t } = useTranslation()
@@ -89,7 +89,7 @@ function HabitsSection() {
   const submit = async () => { if (!name.trim()) return; await addHabit(name); setName(''); setAdding(false) }
   return <section className="habit-section"><div className="habit-heading"><h2>{t('habits.title')}</h2><button type="button" className="add-button" aria-label={t('habits.add')} onClick={() => setAdding(true)}><Plus /></button></div>
     {adding && <input autoFocus className="quick-add" value={name} onChange={(event: { target: HTMLInputElement }) => setName(event.target.value)} onKeyDown={(event: { key: string }) => { if (event.key === 'Enter') void submit(); if (event.key === 'Escape') { setAdding(false); setName('') } }} placeholder={t('habits.quickAdd')} />}
-    {!habits.length ? <p className="habit-empty">{t('habits.empty')}</p> : !scheduled.length ? <p className="habit-empty">{t('habits.noneToday')}</p> : <div className="habit-list">{scheduled.map((habit) => { const Icon = habitIcons[habit.icon]; const complete = isHabitCompletedForDate(checks, habit.id, today); return <div className={`habit-row habit-tint-${habit.color}`} key={habit.id}><button type="button" className="habit-main" onClick={() => navigate(`/habits/${habit.id}`)}><Icon className="habit-row-icon" aria-hidden="true" /><span>{habit.name}</span></button><button type="button" className={`habit-completion ${complete ? 'checked' : ''}`} aria-label={complete ? t('habits.uncheck', { name: habit.name }) : t('habits.check', { name: habit.name })} aria-pressed={complete} onClick={() => void toggle(habit.id)}>{complete ? <CircleCheck aria-hidden="true" /> : <Circle aria-hidden="true" />}</button></div> })}</div>}
+    {!habits.length ? <p className="habit-empty">{t('habits.empty')}</p> : !scheduled.length ? <p className="habit-empty">{t('habits.noneToday')}</p> : <div className="habit-list">{scheduled.map((habit) => { const Icon = habitIcons[habit.icon]; const complete = isHabitCompletedForDate(checks, habit.id, today); return <div className={`habit-row habit-tint-${habit.color}`} key={habit.id}><button type="button" className="habit-main" onClick={() => navigate(`/habits/${habit.id}`)}><Icon className="habit-row-icon" aria-hidden="true" /><span class={`habit-completion ${complete ? 'checked' : ''}`}>{habit.name}</span></button><button type="button" className={`habit-completion ${complete ? 'checked' : ''}`} aria-label={complete ? t('habits.uncheck', { name: habit.name }) : t('habits.check', { name: habit.name })} aria-pressed={complete} onClick={() => void toggle(habit.id)}>{complete ? <CircleCheck aria-hidden="true" /> : <Circle aria-hidden="true" />}</button></div> })}</div>}
   </section>
 }
 

@@ -53,12 +53,12 @@ function normalizeSettings(value: unknown): Settings {
   return { id: 'app', language: value.language as Settings['language'], theme: value.theme as Settings['theme'], accentColor: accentColor as Settings['accentColor'], priorityAgingEnabled: value.priorityAgingEnabled, priorityAgingIntervalDays: value.priorityAgingIntervalDays as number, showHabitsOnDashboard: typeof value.showHabitsOnDashboard === 'boolean' ? value.showHabitsOnDashboard : true, updatedAt: typeof value.updatedAt === 'string' ? value.updatedAt : new Date().toISOString() }
 }
 
-const habitIcons = ['circle-checked-big', 'circle-check-big', 'sparkles', 'heart', 'book', 'activity', 'dumbbell', 'footprints', 'glass-water', 'moon', 'sun', 'coffee', 'leaf', 'brain', 'apple', 'bed', 'music', 'pencil']
+const habitIcons = ['circle-checked-big', 'circle-check-big', 'circle', 'sparkles', 'sun', 'leaf', 'heart', 'brain', 'footprints', 'dumbbell', 'glass-water', 'coffee', 'apple', 'bed', 'book-open-text', 'book', 'activity', 'gamepad2', 'music', 'mail', 'notebook-pen', 'credit-card', 'moon', 'pencil']
 const habitColors = ['neutral', 'blue', 'purple', 'pink', 'green', 'orange', 'teal']
 function normalizeHabit(value: unknown): Habit {
   if (!isRecord(value) || !requiredString(value, 'id') || !requiredString(value, 'name') || !requiredString(value, 'createdAt') || !requiredString(value, 'updatedAt')) throw new BackupValidationError('Invalid habit record')
   if (!habitIcons.includes(value.icon as string) || !habitColors.includes(value.color as string) || !['daily', 'weekdays'].includes(value.frequency as string) || !Array.isArray(value.weekdays) || value.weekdays.some((day) => !Number.isInteger(day) || (day as number) < 0 || (day as number) > 6) || (value.frequency === 'weekdays' && value.weekdays.length === 0)) throw new BackupValidationError('Invalid habit settings')
-  const icon = value.icon === 'circle-check-big' ? 'circle-checked-big' : value.icon as Habit['icon']
+  const icon = ['circle-check-big', 'circle', 'book', 'activity', 'moon', 'pencil'].includes(value.icon as string) ? 'circle-checked-big' : value.icon as Habit['icon']
   return { id: value.id as string, name: (value.name as string).trim(), icon, color: value.color as Habit['color'], frequency: value.frequency as Habit['frequency'], weekdays: [...new Set(value.weekdays as number[])], createdAt: value.createdAt as string, updatedAt: value.updatedAt as string, deletedAt: typeof value.deletedAt === 'string' ? value.deletedAt : null }
 }
 function normalizeHabitCheck(value: unknown): HabitCheck {
