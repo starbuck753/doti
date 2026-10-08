@@ -5,7 +5,7 @@ import { Apple, ArrowDown, ArrowUp, Bed, BicepsFlexed, BookOpenText, Brain, Carr
 import { useAppSettings } from '../../app/providers/AppSettingsProvider'
 import { DotiBrand } from '../../app/DotiBrand'
 import type { PriorityLevel, Task, TaskBucket } from '../../domain/models'
-import { getEffectivePriority, sortTasksForDashboard } from './taskUtils'
+import { getDaysUntilDueDate, getEffectivePriority, sortTasksForDashboard } from './taskUtils'
 import { useTasks } from './useTasks'
 import { UpcomingBirthdays } from '../birthdays/BirthdaysPage'
 import { useTaskLinkIndicators } from '../links/useTaskNoteLinks'
@@ -50,6 +50,7 @@ function TaskRow({ task, hasLinkedNotes, onComplete, onRestore, onMove, onPriori
   const navigate = useNavigate()
   const { priorityAgingEnabled, priorityAgingIntervalDays } = useAppSettings()
   const priority = getEffectivePriority(task, { priorityAgingEnabled, priorityAgingIntervalDays })
+  const daysUntilDue = task.dueDate ? getDaysUntilDueDate(task.dueDate) : null
   const cyclePriority = () => onPriority((priority % 4 + 1) as PriorityLevel)
   // const hasDetails = task.description.trim().length > 0 || hasLinkedNotes
   const hasDetails = hasLinkedNotes
@@ -59,6 +60,7 @@ function TaskRow({ task, hasLinkedNotes, onComplete, onRestore, onMove, onPriori
     <span className="task-title">{task.title}</span>
     {/* Description indicator disabled while task descriptions are hidden from the UI. */}
     {hasDetails && <span className="details-indicator" aria-label={t('links.linkedNotes')}><FileTextIcon /></span>}
+    {daysUntilDue !== null && daysUntilDue >= 0 && daysUntilDue < 10 && <span className="task-due-indicator">{daysUntilDue === 0 ? t('taskDetail.dueToday') : t('taskDetail.dueDaysLeft', { count: daysUntilDue })}</span>}
     <button type="button" className="task-move" aria-label={t(task.bucket === 'today' ? 'taskDetail.moveToLater' : 'taskDetail.moveToToday')} onClick={(event: { stopPropagation: () => void }) => { event.stopPropagation(); onMove() }}><MoveIcon bucket={task.bucket} /></button>
     {task.status === 'active' && <button type="button" className={`priority-dot ${priorityColors[priority]}`} aria-label={t('taskDetail.changePriority')} onClick={(event: { stopPropagation: () => void }) => { event.stopPropagation(); cyclePriority() }} />}
   </div>

@@ -1154,6 +1154,12 @@ input.link-picker-search:focus-visible { outline: none !important; }
   width: 1.1rem;
   height: 1.1rem;
 }
+.task-due-indicator {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  white-space: nowrap;
+}
 
 .task-move {
   display: grid;
