@@ -1,14 +1,17 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ArrowDown, ArrowUp, Circle, CircleCheck, EllipsisVertical, Plus, SquareText } from 'lucide-react'
+import { Apple, ArrowDown, ArrowUp, Bed, BicepsFlexed, BookOpenText, Brain, Carrot, Circle, CircleCheck, CircleCheckBig, Coffee, CreditCard, Dumbbell, EllipsisVertical, Footprints, Gamepad2, GlassWater, Heart, Leaf, Mail, Music, NotebookPen, PawPrint, PlantPot, Plus, Popcorn, ShoppingCart, Sparkles, SquareText, Sun } from 'lucide-react'
 import { useAppSettings } from '../../app/providers/AppSettingsProvider'
 import { DotiBrand } from '../../app/DotiBrand'
 import type { PriorityLevel, Task, TaskBucket } from '../../domain/models'
-import { getEffectivePriority, sortTasksForDashboard } from './taskUtils'
+import { getDaysUntilDueDate, getEffectivePriority, sortTasksForDashboard } from './taskUtils'
 import { useTasks } from './useTasks'
 import { UpcomingBirthdays } from '../birthdays/BirthdaysPage'
 import { useTaskLinkIndicators } from '../links/useTaskNoteLinks'
+import { useHabits } from '../habits/useHabits'
+import { getHabitsForDate, getLocalDateKey, isHabitCompletedForDate } from '../habits/habitUtils'
+import type { HabitIcon } from '../../domain/models'
 
 const priorityColors = { 1: 'priority-green', 2: 'priority-yellow', 3: 'priority-orange', 4: 'priority-red' } as const
 
@@ -47,6 +50,7 @@ function TaskRow({ task, hasLinkedNotes, onComplete, onRestore, onMove, onPriori
   const navigate = useNavigate()
   const { priorityAgingEnabled, priorityAgingIntervalDays } = useAppSettings()
   const priority = getEffectivePriority(task, { priorityAgingEnabled, priorityAgingIntervalDays })
+  const daysUntilDue = task.dueDate ? getDaysUntilDueDate(task.dueDate) : null
   const cyclePriority = () => onPriority((priority % 4 + 1) as PriorityLevel)
   // const hasDetails = task.description.trim().length > 0 || hasLinkedNotes
   const hasDetails = hasLinkedNotes
@@ -56,6 +60,7 @@ function TaskRow({ task, hasLinkedNotes, onComplete, onRestore, onMove, onPriori
     <span className="task-title">{task.title}</span>
     {/* Description indicator disabled while task descriptions are hidden from the UI. */}
     {hasDetails && <span className="details-indicator" aria-label={t('links.linkedNotes')}><FileTextIcon /></span>}
+    {daysUntilDue !== null && daysUntilDue >= 0 && daysUntilDue < 10 && <span className="task-due-indicator">{daysUntilDue === 0 ? t('taskDetail.dueToday') : t('taskDetail.dueDaysLeft', { count: daysUntilDue })}</span>}
     <button type="button" className="task-move" aria-label={t(task.bucket === 'today' ? 'taskDetail.moveToLater' : 'taskDetail.moveToToday')} onClick={(event: { stopPropagation: () => void }) => { event.stopPropagation(); onMove() }}><MoveIcon bucket={task.bucket} /></button>
     {task.status === 'active' && <button type="button" className={`priority-dot ${priorityColors[priority]}`} aria-label={t('taskDetail.changePriority')} onClick={(event: { stopPropagation: () => void }) => { event.stopPropagation(); cyclePriority() }} />}
   </div>
@@ -73,6 +78,18 @@ function TaskSection({ bucket, tasks, linkedTaskIds, onAdd, onComplete, onRestor
   </section>
 }
 
+const habitIcons = { 'circle-checked-big': CircleCheckBig, sparkles: Sparkles, sun: Sun, leaf: Leaf, 'plant-pot': PlantPot, 'paw-print': PawPrint, footprints: Footprints, dumbbell: Dumbbell, 'biceps-flexed': BicepsFlexed, heart: Heart, brain: Brain, bed: Bed, 'glass-water': GlassWater, coffee: Coffee, apple: Apple, carrot: Carrot, popcorn: Popcorn, 'shopping-cart': ShoppingCart, 'book-open-text': BookOpenText, gamepad2: Gamepad2, music: Music, mail: Mail, 'notebook-pen': NotebookPen, 'credit-card': CreditCard } satisfies Record<HabitIcon, typeof Circle>
+
+function HabitsSection() {
+  const { t } = useTranslation()
+  const { habits, checks, toggle } = useHabits()
+  const today = getLocalDateKey()
+  const scheduled = getHabitsForDate(habits, new Date())
+  return <section className="habit-section"><div className="habit-heading"><h2>{t('habits.title')}</h2><Link className="habit-see-all" to="/habits">{t('habits.seeAll')}</Link></div>
+    {!habits.some((habit) => !habit.deletedAt) ? <p className="habit-empty">{t('habits.empty')}</p> : !scheduled.length ? <p className="habit-empty">{t('habits.noneToday')}</p> : <div className="habit-list">{scheduled.map((habit) => { const Icon = habitIcons[habit.icon] ?? CircleCheckBig; const complete = isHabitCompletedForDate(checks, habit.id, today); return <button type="button" role="checkbox" aria-checked={complete} aria-label={`${habit.name}: ${t(complete ? 'habits.completed' : 'habits.notCompleted')}`} className={`habit-row habit-tint-${habit.color} ${complete ? 'checked' : ''}`} key={habit.id} onClick={() => void toggle(habit.id)}><Icon className="habit-row-icon" aria-hidden="true" /><span className="habit-row-name">{habit.name}</span><span className={`habit-status ${complete ? 'checked' : ''}`} aria-hidden="true">{complete ? <CircleCheck aria-hidden="true" /> : <Circle aria-hidden="true" />}</span></button> })}</div>}
+  </section>
+}
+
 export function TasksDashboard() {
   const { t, i18n } = useTranslation()
   const { tasks, addTask, completeTask, restoreTask, moveTask, changePriority } = useTasks()
@@ -86,6 +103,9 @@ export function TasksDashboard() {
       <TaskSection bucket="today" tasks={sorted.filter((task) => task.bucket === 'today')} linkedTaskIds={taskIdsWithNotes} onAdd={(title) => addTask(title, 'today')} onComplete={completeTask} onRestore={restoreTask} onMove={(task) => moveTask(task, 'later')} onPriority={changePriority} />
       <TaskSection bucket="later" tasks={sorted.filter((task) => task.bucket === 'later')} linkedTaskIds={taskIdsWithNotes} onAdd={(title) => addTask(title, 'later')} onComplete={completeTask} onRestore={restoreTask} onMove={(task) => moveTask(task, 'today')} onPriority={changePriority} />
     </div>
-    <UpcomingBirthdays />
+    <aside className="dashboard-sidebar">
+      {settings.showHabitsOnDashboard && <HabitsSection />}
+      <UpcomingBirthdays />
+    </aside>
   </section>
 }

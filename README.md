@@ -1,7 +1,7 @@
 # Doti
 
-Doti is a minimal, local-first personal organizer for tasks, notes
-and birthdays.
+Doti is a minimal, local-first personal organizer for tasks, notes,
+birthdays, and habits.
 
 Its goal is to keep everyday organization simple while providing a few
 smart features, such as automatic task priority aging.
@@ -31,7 +31,8 @@ A task contains:
 - Completion state
 - Linked notes
 
-Tasks do not contain long descriptions or embedded notes.
+Tasks do not contain descriptions or embedded notes. Additional information
+belongs in Notes linked to the task.
 
 If a task requires additional information, it can be linked to one or
 more Notes.
@@ -106,6 +107,35 @@ Visual proximity:
 
 The Dashboard displays the next three birthdays.
 
+### Habits
+
+Habits are a deliberately simple tracker. The optional Dashboard section
+shows only today's scheduled habits in compact tinted rows. Tap anywhere on
+a row to check or uncheck today's habit. Dashboard rows do not create, edit,
+or open habits; **See all** opens `/habits`.
+
+The `/habits` page is where habits are created and managed. It shows a
+read-only summary for the current Monday-to-Sunday week and a list of all
+active habits. Select a habit to open `/habits/:id`, where its name, icon,
+color, recurrence, and deletion can be managed.
+
+Habits repeat every day or on selected weekdays (Sunday is weekday 0;
+Monday is 1 through Saturday 6 internally). A habit starts on its local
+creation date. Checks are stored by local calendar date and retained as
+history when unchecked or when the habit is deleted. The weekly summary
+respects each habit's schedule and creation date; future and inactive days
+are not counted as missed. It has no historical navigation, streaks, or
+statistics.
+
+When Supabase sync is enabled, Habits and HabitChecks are synchronized
+between devices. Habit definitions and HabitChecks are independent; an
+active HabitCheck means the habit was completed on that local calendar date,
+and a soft-deleted HabitCheck means the completion was undone. HabitChecks
+are logically unique by `user_id + habit_id + date`, so even if two devices
+create a check for the same habit and date while offline, only one logical
+completion remains after sync. Conflicts are resolved by `updated_at`, with
+the later change winning.
+
 ### Settings
 
 Current settings include:
@@ -114,6 +144,7 @@ Current settings include:
 - Language: English / Spanish
 - Priority Aging
 - Aging Interval
+- Show Habits on Dashboard
 
 ### Backup & Restore
 
@@ -124,6 +155,7 @@ Backups include:
 - Notes
 - Birthdays
 - Task/Note links
+- Habits and HabitChecks
 - Settings
 
 Restore currently uses full replacement rather than merge.
@@ -136,7 +168,7 @@ Structure:
 
 - Today
 - Later
-- Habits (planned)
+- Habits (optional, controlled in Settings)
 - Upcoming Birthdays
 - Bottom navigation
 
@@ -160,6 +192,8 @@ Task
 Note
 Birthday
 TaskNoteLink
+Habit
+HabitCheck
 Settings
 
 Data is stored locally using IndexedDB through Dexie.
@@ -175,7 +209,8 @@ i18next
 Markdown rendering
 PWA
 
-Doti is local-first and currently requires no backend.
+Doti is local-first. Supabase is optional and used only as a
+synchronization layer.
 
 ## PWA
 
@@ -205,10 +240,11 @@ npm run dev
 
 1. Create a Supabase project.
 2. Run `supabase/migrations/001_initial_sync_schema.sql` in the Supabase SQL editor.
-3. Copy the project URL and public anon/publishable key into a local `.env` using `.env.example`.
-4. Add repository variables named `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` under GitHub Settings → Secrets and variables → Actions → Variables.
-5. In Supabase Authentication → URL Configuration, set the Site URL to `https://starbuck753.github.io/doti/` and add that same URL as an allowed redirect URL.
-6. Push to `main` to build and deploy Doti with sync enabled.
+3. Run `supabase/migrations/002_habits_sync.sql` in the Supabase SQL editor.
+4. Copy the project URL and public anon/publishable key into a local `.env` using `.env.example`.
+5. Add repository variables named `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` under GitHub Settings → Secrets and variables → Actions → Variables.
+6. In Supabase Authentication → URL Configuration, set the Site URL to `https://starbuck753.github.io/doti/` and add that same URL as an allowed redirect URL.
+7. Push to `main` to build and deploy Doti with sync enabled.
 
 Only the public anon key belongs in the browser build. Never add a Supabase service-role key to local Vite variables, GitHub Pages variables, or the repository.
 
@@ -216,29 +252,11 @@ Only the public anon key belongs in the browser build. Never add a Supabase serv
 
 Potential future features:
 
-### Habits
-
-A deliberately simple habit tracker.
-
-Initial concept:
-- Habit name
-- Daily or selected weekdays
-- Check/uncheck for today
-- Small Dashboard section
-- Optional dedicated page later
-
-The goal is to avoid:
-- gamification
-- complex goals
-- excessive statistics
-- project-management style configuration
-
 ### Sync
 
-Future synchronization between Windows and Android.
-
-The current local-first architecture is intentionally designed so a sync
-layer can be added later.
+Supabase sync now covers Tasks, Notes, Birthdays, Task/Note links, Settings,
+Habits and HabitChecks. Future improvements could add more providers while
+keeping the same local-first architecture.
 
 ### Android
 
@@ -267,7 +285,7 @@ Birthdays answer:
 
 "What important date is coming?"
 
-Future Habits should answer:
+Habits answer:
 
 "What do I want to keep doing?"
 

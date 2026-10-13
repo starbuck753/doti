@@ -1,7 +1,7 @@
-import type { Birthday, Note, Settings, Task, TaskNoteLink } from '../domain/models'
+import type { Birthday, Habit, HabitCheck, Note, Settings, Task, TaskNoteLink } from '../domain/models'
 
-export type SyncEntityType = 'tasks' | 'notes' | 'birthdays' | 'taskNoteLinks' | 'settings'
-export type SyncRecord = Task | Note | Birthday | TaskNoteLink | Settings
+export type SyncEntityType = 'tasks' | 'notes' | 'birthdays' | 'taskNoteLinks' | 'settings' | 'habits' | 'habitChecks'
+export type SyncRecord = Task | Note | Birthday | TaskNoteLink | Settings | Habit | HabitCheck
 
 export interface SyncChanges {
   tasks: Task[]
@@ -9,6 +9,8 @@ export interface SyncChanges {
   birthdays: Birthday[]
   taskNoteLinks: TaskNoteLink[]
   settings: Settings[]
+  habits: Habit[]
+  habitChecks: HabitCheck[]
 }
 
 export interface PullChanges extends SyncChanges {

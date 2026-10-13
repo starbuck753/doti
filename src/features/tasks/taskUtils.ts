@@ -2,6 +2,17 @@ import type { PriorityLevel, Task } from '../../domain/models'
 
 const MAX_PRIORITY: PriorityLevel = 4
 
+export function getDaysUntilDueDate(dueDate: string, now = new Date()): number | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dueDate)
+  if (!match) return null
+  const [, year, month, day] = match
+  const dueDay = Date.UTC(Number(year), Number(month) - 1, Number(day))
+  const validDate = new Date(dueDay)
+  if (validDate.getUTCFullYear() !== Number(year) || validDate.getUTCMonth() !== Number(month) - 1 || validDate.getUTCDate() !== Number(day)) return null
+  const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())
+  return (dueDay - today) / 86_400_000
+}
+
 export function getEffectivePriority(task: Task, settings: { priorityAgingEnabled: boolean; priorityAgingIntervalDays: number }, now = new Date()): PriorityLevel {
   if (!settings.priorityAgingEnabled || task.status !== 'active') return task.priorityBase
   const started = new Date(task.priorityAgingStartedAt).getTime()
