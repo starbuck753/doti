@@ -7,3 +7,5 @@ android/local.properties
 android/**/build/
 android/captures/
 android/.idea/
+.gradle-user-home/
+
