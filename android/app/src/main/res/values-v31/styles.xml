@@ -1,0 +1,7 @@
+<resources>
+    <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/doti_navy</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/doti_mark</item>
+        <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
+    </style>
+</resources>

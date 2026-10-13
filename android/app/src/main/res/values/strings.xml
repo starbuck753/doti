@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Doti</string>
+    <string name="title_activity_main">Doti</string>
+    <string name="package_name">com.doti.app</string>
+    <string name="custom_url_scheme">com.doti.app</string>
+</resources>

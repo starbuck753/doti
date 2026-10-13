@@ -20,7 +20,7 @@ export function SettingsPage() {
   const [syncPassword, setSyncPassword] = useState('')
   const [syncFeedback, setSyncFeedback] = useState<string | null>(null)
   const themeOptions: { value: Theme; label: string }[] = [{ value: 'system', label: t('settings.system') }, { value: 'light', label: t('settings.light') }, { value: 'dark', label: t('settings.dark') }]
-  const exportData = async () => { try { downloadBackup(await createBackup()); setFeedback({ type: 'success', text: t('settings.exportSuccess') }) } catch { setFeedback({ type: 'error', text: t('settings.exportError') }) } }
+  const exportData = async () => { try { await downloadBackup(await createBackup()); setFeedback({ type: 'success', text: t('settings.exportSuccess') }) } catch { setFeedback({ type: 'error', text: t('settings.exportError') }) } }
   const importData = async (event: { target: HTMLInputElement }) => {
     const file = event.target.files?.[0]
     event.target.value = ''

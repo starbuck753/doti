@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next'
 import type { AccentColor, Language, Settings, Theme } from '../../domain/models'
 import { db, defaultSettings } from '../../data/db'
 import { notifyLocalChange } from '../../sync/signals'
+import { Capacitor } from '@capacitor/core'
+import { StatusBar, Style } from '@capacitor/status-bar'
 
 interface AppSettingsContextValue {
   language: Language
@@ -36,7 +38,15 @@ export function AppSettingsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const media = window.matchMedia('(prefers-color-scheme: dark)')
-    const applyTheme = () => { document.documentElement.dataset.theme = settings.theme === 'system' ? (media.matches ? 'dark' : 'light') : settings.theme }
+    const applyTheme = () => {
+      const resolvedTheme = settings.theme === 'system' ? (media.matches ? 'dark' : 'light') : settings.theme
+      const isDark = resolvedTheme === 'dark'
+      document.documentElement.dataset.theme = resolvedTheme
+      if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android') {
+        void StatusBar.setStyle({ style: isDark ? Style.Dark : Style.Light })
+        void StatusBar.setBackgroundColor({ color: isDark ? '#171b1d' : '#efeee9' }).catch(() => undefined)
+      }
+    }
     document.documentElement.dataset.accent = settings.accentColor
     applyTheme()
     media.addEventListener?.('change', applyTheme)

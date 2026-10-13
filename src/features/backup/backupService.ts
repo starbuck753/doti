@@ -1,6 +1,9 @@
 import { db, defaultSettings } from '../../data/db'
 import type { Birthday, Habit, HabitCheck, Note, Settings, Task, TaskNoteLink } from '../../domain/models'
 import { resetSyncMetadata } from '../../sync/localSyncState'
+import { Capacitor } from '@capacitor/core'
+import { Directory, Encoding, Filesystem } from '@capacitor/filesystem'
+import { Share } from '@capacitor/share'
 
 export const DotiBackupVersion = 1 as const
 const BACKUP_FORMAT = 'doti-backup' as const
@@ -91,13 +94,19 @@ export async function createBackup(): Promise<DotiBackupV1> {
   return { format: BACKUP_FORMAT, version: DotiBackupVersion, exportedAt: new Date().toISOString(), data: { tasks, notes, birthdays, taskNoteLinks, habits, habitChecks, settings: { ...defaultSettings, ...storedSettings } } }
 }
 
-export function downloadBackup(backup: DotiBackupV1) {
+export async function downloadBackup(backup: DotiBackupV1) {
   const json = JSON.stringify(backup, null, 2)
+  const date = new Date().toISOString().slice(0, 10)
+  const filename = `doti-backup-${date}.json`
+  if (Capacitor.isNativePlatform()) {
+    const file = await Filesystem.writeFile({ path: filename, data: json, directory: Directory.Cache, encoding: Encoding.UTF8 })
+    await Share.share({ title: 'Doti backup', files: [file.uri], dialogTitle: 'Save or share Doti backup' })
+    return
+  }
   const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }))
   const link = document.createElement('a')
-  const date = new Date().toISOString().slice(0, 10)
   link.href = url
-  link.download = `doti-backup-${date}.json`
+  link.download = filename
   link.click()
   URL.revokeObjectURL(url)
 }

@@ -220,6 +220,69 @@ Core functionality works offline after installation/loading.
 
 User data remains stored in IndexedDB.
 
+## Android (Capacitor)
+
+Android packages the same React/TypeScript app in a Capacitor WebView. It
+uses the local `dist` bundle (`webDir: dist`); it does not load the GitHub
+Pages site. `npm run build` remains the `/doti/` GitHub Pages/PWA build,
+including its manifest and service worker. `npm run build:android` makes a
+separate relative-asset build without PWA service-worker registration.
+
+### Android development
+
+Install Node.js 22+, Android Studio 2025.2.1 or newer, and Android SDK
+Platform 36. Android Studio supplies the JDK required by Capacitor 8. Open
+the Android project with `npm run android:open`.
+
+Workflow after changing React code:
+
+```sh
+npm run android:sync   # build Android web assets and sync Capacitor plugins
+npm run android:open   # open android/ in Android Studio
+```
+
+To build an installable debug APK:
+
+```sh
+npm run android:debug
+```
+
+The APK is written to
+`android/app/build/outputs/apk/debug/app-debug.apk`. It can be installed from
+Android Studio or with `adb install -r android/app/build/outputs/apk/debug/app-debug.apk`.
+Debug APKs use the development signing key managed by Gradle. A future store
+release will need a private release keystore, kept outside the repository,
+and a separately configured signed release build; neither is set up here.
+
+Android package ID: `com.doti.app`. The project is under `android/`. Use the
+four Doti priority colors on its navy launcher and splash screens. The native
+app keeps data in its own WebView IndexedDB (`doti-db`); it does not share the
+PWA's local database. To move between PWA and APK, sync the PWA to the same
+Supabase account, then sign in to that account in Android. The existing
+SyncEngine transfers data; signing into a new installation does not imply
+that its local database is shared with the browser.
+
+Android uses hash-based React Router URLs inside the WebView, leaving web
+URLs unchanged. The system back button follows route history and returns to
+Tasks before exiting. External web links open in an Android browser tab. The
+status bar style follows Doti's light/dark setting, and the layout accounts
+for system safe areas.
+
+Email confirmation continues to open the existing GitHub Pages Doti URL.
+After confirming, return to the app and sign in there; no native deep link is
+required. Supabase uses only `VITE_SUPABASE_URL` and the public
+`VITE_SUPABASE_ANON_KEY` at build time. Keep secrets out of Vite variables.
+Offline edits remain local and the existing SyncEngine can upload them after
+reconnection. JSON export uses Android's share sheet; import uses Android's
+system file picker.
+
+The current Android target supports the existing app, local IndexedDB,
+Supabase email/password sign-in and sync, and backup/restore. It does not yet
+include notifications, widgets, background sync, Google sign-in, Play Store
+publishing, or release signing. Confirm behavior on a physical device or
+emulator, especially Android keyboard, system bars, file picking/sharing,
+authentication, and offline restart behavior.
+
 ## Deployment
 
 Doti is deployed using GitHub Pages and GitHub Actions.
@@ -258,13 +321,10 @@ Supabase sync now covers Tasks, Notes, Birthdays, Task/Note links, Settings,
 Habits and HabitChecks. Future improvements could add more providers while
 keeping the same local-first architecture.
 
-### Android
+### Android enhancements
 
-Possible future Capacitor-based Android version with:
-- Native notifications
-- Birthday reminders
-- Task reminders
-- Home-screen widgets
+Potential later work includes notifications, reminders, and home-screen
+widgets; none are part of the current Android package.
 
 ## Product Philosophy
 

@@ -8,7 +8,7 @@
 }
 .page-content {
   flex: 1;
-  padding: 0.9rem var(--page-padding) calc(var(--bottom-nav-height) + var(--space-6));
+  padding: calc(0.9rem + env(safe-area-inset-top)) var(--page-padding) calc(var(--bottom-nav-height) + var(--space-6) + env(safe-area-inset-bottom));
 }
 
 .placeholder-page, .settings-page, .tasks-page, .birthdays-page, .notes-page, .note-detail-page, .completed-page, .detail-page {
