@@ -1,6 +1,10 @@
-import type { Birthday, Note, Settings, Task, TaskNoteLink } from '../domain/models'
+import type { Birthday, Habit, HabitCheck, Note, Settings, Task, TaskNoteLink } from '../domain/models'
 import type { PullChanges, PushResult, SyncChanges, SyncProvider } from './types'
 import { supabase } from './supabaseClient'
+
+const habitFrequencies: Habit['frequency'][] = ['daily', 'weekdays']
+const habitColors: Habit['color'][] = ['neutral', 'blue', 'purple', 'pink', 'green', 'orange', 'teal']
+const habitIcons: Habit['icon'][] = ['circle-checked-big', 'sparkles', 'sun', 'leaf', 'plant-pot', 'paw-print', 'footprints', 'dumbbell', 'biceps-flexed', 'heart', 'brain', 'bed', 'glass-water', 'coffee', 'apple', 'carrot', 'popcorn', 'shopping-cart', 'book-open-text', 'gamepad2', 'music', 'mail', 'notebook-pen', 'credit-card']
 
 type Row = Record<string, unknown>
 const asRow = (value: unknown): Row => value && typeof value === 'object' ? value as Row : {}
@@ -34,19 +38,35 @@ function linkFrom(row: Row): TaskNoteLink | null {
   const createdAt = validIso(text(row, 'created_at'), now); return { id, taskId, noteId, createdAt, updatedAt: validIso(text(row, 'updated_at'), createdAt), deletedAt: toDateOrNull(text(row, 'deleted_at')) }
 }
 function settingsFrom(row: Row): Settings | null {
-  const updatedAt = text(row, 'updated_at') ?? new Date().toISOString(); const language = text(row, 'language'); const theme = text(row, 'theme'); const accentColor = text(row, 'accent_color'); const priorityAgingEnabled = boolean(row, 'priority_aging_enabled'); const priorityAgingIntervalDays = number(row, 'priority_aging_interval_days')
-  if (!['en', 'es'].includes(language ?? '') || !['system', 'light', 'dark'].includes(theme ?? '') || !['blue', 'purple', 'pink', 'green', 'orange', 'teal'].includes(accentColor ?? '') || priorityAgingEnabled === null || priorityAgingIntervalDays === null) return null
-  return { id: 'app', language: language as Settings['language'], theme: theme as Settings['theme'], accentColor: accentColor as Settings['accentColor'], priorityAgingEnabled, priorityAgingIntervalDays, showHabitsOnDashboard: true, updatedAt }
+  const updatedAt = text(row, 'updated_at') ?? new Date().toISOString(); const language = text(row, 'language'); const theme = text(row, 'theme'); const accentColor = text(row, 'accent_color'); const priorityAgingEnabled = boolean(row, 'priority_aging_enabled'); const priorityAgingIntervalDays = number(row, 'priority_aging_interval_days'); const showHabitsOnDashboard = boolean(row, 'show_habits_on_dashboard')
+  if (!['en', 'es'].includes(language ?? '') || !['system', 'light', 'dark'].includes(theme ?? '') || !['blue', 'purple', 'pink', 'green', 'orange', 'teal'].includes(accentColor ?? '') || priorityAgingEnabled === null || priorityAgingIntervalDays === null || showHabitsOnDashboard === null) return null
+  return { id: 'app', language: language as Settings['language'], theme: theme as Settings['theme'], accentColor: accentColor as Settings['accentColor'], priorityAgingEnabled, priorityAgingIntervalDays, showHabitsOnDashboard, updatedAt }
+}
+
+export function habitFrom(row: Row): Habit | null {
+  const now = new Date().toISOString(); const id = text(row, 'id'); const name = text(row, 'name'); const icon = text(row, 'icon'); const color = text(row, 'color'); const frequency = text(row, 'frequency'); const weekdays = Array.isArray(row.weekdays) ? row.weekdays as unknown[] : null
+  if (!id || name === null || !habitIcons.includes(icon as Habit['icon']) || !habitColors.includes(color as Habit['color']) || !habitFrequencies.includes(frequency as Habit['frequency']) || weekdays === null || weekdays.some((d) => typeof d !== 'number' || d < 0 || d > 6)) return null
+  const createdAt = validIso(text(row, 'created_at'), now); const updatedAt = validIso(text(row, 'updated_at'), createdAt)
+  return { id, name, icon: icon as Habit['icon'], color: color as Habit['color'], frequency: frequency as Habit['frequency'], weekdays: weekdays as number[], createdAt, updatedAt, deletedAt: toDateOrNull(text(row, 'deleted_at')) }
+}
+export function habitCheckFrom(row: Row): HabitCheck | null {
+  const now = new Date().toISOString(); const id = text(row, 'id'); const habitId = text(row, 'habit_id'); const date = text(row, 'date')
+  if (!id || !habitId || !date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return null
+  const createdAt = validIso(text(row, 'created_at'), now); const updatedAt = validIso(text(row, 'updated_at'), createdAt)
+  return { id, habitId, date, createdAt, updatedAt, deletedAt: toDateOrNull(text(row, 'deleted_at')) }
 }
 
 function taskRow(userId: string, task: Task) { return { user_id: userId, id: task.id, title: task.title, status: task.status, bucket: task.bucket, priority_base: task.priorityBase, priority_aging_started_at: task.priorityAgingStartedAt, description: task.description, due_date: task.dueDate, completed_at: task.completedAt, created_at: task.createdAt, updated_at: task.updatedAt, deleted_at: task.deletedAt } }
 function noteRow(userId: string, note: Note) { return { user_id: userId, id: note.id, title: note.title, content: note.content, created_at: note.createdAt, updated_at: note.updatedAt, deleted_at: note.deletedAt } }
 function birthdayRow(userId: string, birthday: Birthday) { return { user_id: userId, id: birthday.id, name: birthday.name, month: birthday.month, day: birthday.day, created_at: birthday.createdAt, updated_at: birthday.updatedAt, deleted_at: birthday.deletedAt } }
 function linkRow(userId: string, link: TaskNoteLink) { return { user_id: userId, id: link.id, task_id: link.taskId, note_id: link.noteId, created_at: link.createdAt, updated_at: link.updatedAt, deleted_at: link.deletedAt } }
-function settingsRow(userId: string, settings: Settings) { return { user_id: userId, id: settings.id, language: settings.language, theme: settings.theme, accent_color: settings.accentColor, priority_aging_enabled: settings.priorityAgingEnabled, priority_aging_interval_days: settings.priorityAgingIntervalDays, updated_at: settings.updatedAt } }
+function settingsRow(userId: string, settings: Settings) { return { user_id: userId, id: settings.id, language: settings.language, theme: settings.theme, accent_color: settings.accentColor, priority_aging_enabled: settings.priorityAgingEnabled, priority_aging_interval_days: settings.priorityAgingIntervalDays, show_habits_on_dashboard: settings.showHabitsOnDashboard, updated_at: settings.updatedAt } }
+export function habitRow(userId: string, habit: Habit) { return { user_id: userId, id: habit.id, name: habit.name, icon: habit.icon, color: habit.color, frequency: habit.frequency, weekdays: habit.weekdays, created_at: habit.createdAt, updated_at: habit.updatedAt, deleted_at: habit.deletedAt } }
+export function habitCheckRow(userId: string, check: HabitCheck) { return { user_id: userId, id: check.id, habit_id: check.habitId, date: check.date, created_at: check.createdAt, updated_at: check.updatedAt, deleted_at: check.deletedAt } }
 
 export class SupabaseSyncProvider implements SyncProvider {
-  constructor(private readonly userId: string) {}
+  private readonly userId: string
+  constructor(userId: string) { this.userId = userId }
 
   async pushChanges(changes: SyncChanges): Promise<PushResult> {
     const client = requireClient(); const rows: Row[] = []
@@ -55,6 +75,8 @@ export class SupabaseSyncProvider implements SyncProvider {
     await push('notes', changes.notes.map((record) => noteRow(this.userId, record)))
     await push('birthdays', changes.birthdays.map((record) => birthdayRow(this.userId, record)))
     await push('task_note_links', changes.taskNoteLinks.map((record) => linkRow(this.userId, record)))
+    await push('habits', changes.habits.map((record) => habitRow(this.userId, record)))
+    await push('habit_checks', changes.habitChecks.map((record) => habitCheckRow(this.userId, record)), 'user_id,habit_id,date')
     await push('user_settings', changes.settings.map((record) => settingsRow(this.userId, record)), 'user_id')
     return { nextCursor: maxCursor(rows, null) }
   }
@@ -62,7 +84,7 @@ export class SupabaseSyncProvider implements SyncProvider {
   async pullChanges(cursor: string | null): Promise<PullChanges> {
     const client = requireClient(); const allRows: Row[] = []
     const read = async (table: string) => { let query = client.from(table).select('*').order('server_updated_at', { ascending: true }); if (cursor) query = query.gt('server_updated_at', cursor); const { data, error } = await query; if (error) throw error; const rows = (data ?? []) as Row[]; allRows.push(...rows); return rows }
-    const [tasks, notes, birthdays, taskNoteLinks, settings] = await Promise.all([read('tasks'), read('notes'), read('birthdays'), read('task_note_links'), read('user_settings')])
-    return { tasks: tasks.map(taskFrom).filter((value): value is Task => Boolean(value)), notes: notes.map(noteFrom).filter((value): value is Note => Boolean(value)), birthdays: birthdays.map(birthdayFrom).filter((value): value is Birthday => Boolean(value)), taskNoteLinks: taskNoteLinks.map(linkFrom).filter((value): value is TaskNoteLink => Boolean(value)), settings: settings.map(settingsFrom).filter((value): value is Settings => Boolean(value)), nextCursor: maxCursor(allRows, cursor) }
+    const [tasks, notes, birthdays, taskNoteLinks, habits, habitChecks, settings] = await Promise.all([read('tasks'), read('notes'), read('birthdays'), read('task_note_links'), read('habits'), read('habit_checks'), read('user_settings')])
+    return { tasks: tasks.map(taskFrom).filter((value): value is Task => Boolean(value)), notes: notes.map(noteFrom).filter((value): value is Note => Boolean(value)), birthdays: birthdays.map(birthdayFrom).filter((value): value is Birthday => Boolean(value)), taskNoteLinks: taskNoteLinks.map(linkFrom).filter((value): value is TaskNoteLink => Boolean(value)), habits: habits.map(habitFrom).filter((value): value is Habit => Boolean(value)), habitChecks: habitChecks.map(habitCheckFrom).filter((value): value is HabitCheck => Boolean(value)), settings: settings.map(settingsFrom).filter((value): value is Settings => Boolean(value)), nextCursor: maxCursor(allRows, cursor) }
   }
 }

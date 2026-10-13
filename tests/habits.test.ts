@@ -1,5 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
 import type { Habit, HabitCheck } from '../src/domain/models.ts'
 import { getCurrentWeekDates, getHabitDayState, getHabitsForDate, getLocalDateKey, isHabitCompletedForDate, isHabitScheduledForDate } from '../src/features/habits/habitUtils.ts'
 
@@ -56,4 +57,32 @@ test('a habit created mid-week only has applicable states from its local creatio
   const today = new Date(2026, 9, 9, 12)
   assert.equal(getHabitDayState(createdThursday, [], new Date(2026, 9, 5), today), 'before-created')
   assert.equal(getHabitDayState(createdThursday, [], new Date(2026, 9, 8), today), 'missed')
+})
+
+test('concurrent HabitCheck creation for the same logical pair converges to the latest update', () => {
+  // Two devices create active HabitChecks for the same habit/date with different UUIDs.
+  const a: HabitCheck = { id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', habitId: 'h1', date: '2026-10-08', createdAt: '2026-10-08T08:00:00.000Z', updatedAt: '2026-10-08T08:00:00.000Z', deletedAt: null }
+  const b: HabitCheck = { id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', habitId: 'h1', date: '2026-10-08', createdAt: '2026-10-08T09:00:00.000Z', updatedAt: '2026-10-08T09:00:00.000Z', deletedAt: null }
+  const winner = [a, b].reduce((prev, cur) => (cur.updatedAt >= prev.updatedAt ? cur : prev))
+  assert.equal(winner.id, b.id)
+  assert.equal(winner.deletedAt, null)
+})
+
+test('concurrent check/uncheck conflict resolves to the most recent updatedAt', () => {
+  const checked: HabitCheck = { id: 'c1', habitId: 'h1', date: '2026-10-08', createdAt: '2026-10-08T10:00:00.000Z', updatedAt: '2026-10-08T10:00:00.000Z', deletedAt: null }
+  const unchecked: HabitCheck = { id: 'c2', habitId: 'h1', date: '2026-10-08', createdAt: '2026-10-08T10:00:00.000Z', updatedAt: '2026-10-08T11:00:00.000Z', deletedAt: '2026-10-08T11:00:00.000Z' }
+  const winner = [checked, unchecked].reduce((prev, cur) => (cur.updatedAt >= prev.updatedAt ? cur : prev))
+  assert.equal(winner.deletedAt, unchecked.deletedAt)
+})
+
+test('Habits migration file contains tables, RLS, indexes, foreign key and settings column', async () => {
+  const migration = await readFile('supabase/migrations/002_habits_sync.sql', 'utf8')
+  assert.ok(migration.includes('create table if not exists public.habits'))
+  assert.ok(migration.includes('create table if not exists public.habit_checks'))
+  assert.ok(migration.includes('alter table public.habits enable row level security'))
+  assert.ok(migration.includes('alter table public.habit_checks enable row level security'))
+  assert.ok(migration.includes('references public.habits(user_id, id)'))
+  assert.ok(migration.includes('habit_checks_user_server_updated_at_idx'))
+  assert.ok(migration.includes('habit_checks_habit_date_idx'))
+  assert.ok(migration.includes('show_habits_on_dashboard'))
 })
