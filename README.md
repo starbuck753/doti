@@ -107,6 +107,29 @@ Visual proximity:
 
 The Dashboard displays the next three birthdays.
 
+The Android app can schedule local birthday notifications from Settings. It
+supports the birthday day and optional reminders one or seven days earlier.
+Dates and the selected time use the device's local calendar and time zone;
+February 29 is observed on February 28 in non-leap years. If a reminder's
+selected time has already passed today, Doti skips it for this year rather
+than delivering it late.
+
+Schedules are reconciled on app launch, foreground, local birthday/settings
+changes, restore, and remote sync. Doti keeps a rolling 400-day window and
+caps its own pending reminders at 450 to leave headroom for Android's pending
+notification limits. Open Doti again before that window expires to extend
+annual schedules. Android's reboot receiver restores pending notifications
+after a device restart; if a reminder became overdue while the device was
+powered off, the plugin may deliver it shortly after reboot. Force-stop, OEM
+battery policies, revoked notification permission, or long periods without
+reopening the app can still interrupt delivery. Delivery time is approximate;
+Doti marks every notification inexact, so it does not invoke the exact-alarm
+settings flow. The Local Notifications 8.3.1 Android library manifest does
+declare `SCHEDULE_EXACT_ALARM`; inspect the merged APK manifest when building
+Android and remove that declaration if it is not needed for the target release.
+Android 13+ notification permission is requested only after an explicit action
+in Settings. The PWA does not request or schedule browser notifications.
+
 ### Habits
 
 Habits are a deliberately simple tracker. The optional Dashboard section
@@ -145,6 +168,7 @@ Current settings include:
 - Priority Aging
 - Aging Interval
 - Show Habits on Dashboard
+- Birthday notification preferences
 
 ### Backup & Restore
 
@@ -241,10 +265,11 @@ npm run dev
 1. Create a Supabase project.
 2. Run `supabase/migrations/001_initial_sync_schema.sql` in the Supabase SQL editor.
 3. Run `supabase/migrations/002_habits_sync.sql` in the Supabase SQL editor.
-4. Copy the project URL and public anon/publishable key into a local `.env` using `.env.example`.
-5. Add repository variables named `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` under GitHub Settings → Secrets and variables → Actions → Variables.
-6. In Supabase Authentication → URL Configuration, set the Site URL to `https://starbuck753.github.io/doti/` and add that same URL as an allowed redirect URL.
-7. Push to `main` to build and deploy Doti with sync enabled.
+4. Run `supabase/migrations/003_birthday_notification_settings.sql` to add the shared reminder preferences to the existing Settings row.
+5. Copy the project URL and public anon/publishable key into a local `.env` using `.env.example`.
+6. Add repository variables named `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` under GitHub Settings → Secrets and variables → Actions → Variables.
+7. In Supabase Authentication → URL Configuration, set the Site URL to `https://starbuck753.github.io/doti/` and add that same URL as an allowed redirect URL.
+8. Push to `main` to build and deploy Doti with sync enabled.
 
 Only the public anon key belongs in the browser build. Never add a Supabase service-role key to local Vite variables, GitHub Pages variables, or the repository.
 
@@ -260,11 +285,8 @@ keeping the same local-first architecture.
 
 ### Android
 
-Possible future Capacitor-based Android version with:
-- Native notifications
-- Birthday reminders
-- Task reminders
-- Home-screen widgets
+The Capacitor Android app supports local Birthday notifications. Task
+reminders and home-screen widgets remain future ideas.
 
 ## Product Philosophy
 

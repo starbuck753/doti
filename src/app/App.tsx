@@ -1,4 +1,5 @@
-import { NavLink, Outlet, Route, Routes } from 'react-router-dom'
+import { NavLink, Outlet, Route, Routes, useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Cake, CircleCheck, SquareText } from 'lucide-react'
 import { useAppSettings } from './providers/AppSettingsProvider'
@@ -12,6 +13,20 @@ import { CompletedTasksPage } from '../features/tasks/CompletedTasksPage'
 import { HabitDetail } from '../features/habits/HabitDetail'
 import { HabitsPage } from '../features/habits/HabitsPage'
 import './app.css'
+import { BIRTHDAY_NOTIFICATION_TAP_EVENT, birthdayNotificationScheduler } from '../notifications/birthdayNotificationScheduler'
+
+function BirthdayNotificationNavigation() {
+  const navigate = useNavigate()
+  useEffect(() => {
+    const onTap = () => navigate('/birthdays')
+    window.addEventListener(BIRTHDAY_NOTIFICATION_TAP_EVENT, onTap)
+    let stop: (() => void) | undefined
+    let active = true
+    void birthdayNotificationScheduler.start().then((cleanup) => { if (active) stop = cleanup; else cleanup() })
+    return () => { active = false; window.removeEventListener(BIRTHDAY_NOTIFICATION_TAP_EVENT, onTap); stop?.() }
+  }, [navigate])
+  return null
+}
 
 function NavIcon({ type }: { type: 'tasks' | 'birthdays' | 'notes' }) {
   const commonProps = { size: 20, strokeWidth: 1.9, 'aria-hidden': true }
@@ -35,6 +50,7 @@ function Layout() {
   ]
 
   return <div className="app-shell">
+    <BirthdayNotificationNavigation />
     <main className="page-content"><Outlet /></main>
     <nav className="bottom-nav" aria-label={t('navigation.tasks')}>
       {navigation.map(({ path, label, type }) => (

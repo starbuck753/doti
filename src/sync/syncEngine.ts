@@ -2,6 +2,7 @@ import { db } from '../data/db'
 import type { Birthday, Habit, HabitCheck, Note, Settings, Task, TaskNoteLink } from '../domain/models'
 import { getSyncState, updateSyncState } from './localSyncState'
 import type { SyncChanges, SyncEntityType, SyncProvider, SyncRecord, SyncStatus } from './types'
+import { notifyBirthdayNotificationDataChanged } from '../notifications/birthdayNotificationScheduler'
 
 // Habits must be applied before dependent HabitChecks.
 const entityTypes: SyncEntityType[] = ['tasks', 'notes', 'birthdays', 'taskNoteLinks', 'settings', 'habits', 'habitChecks']
@@ -61,6 +62,7 @@ export class SyncEngine {
   }
 
   private async applyRemote(pulled: Awaited<ReturnType<SyncProvider['pullChanges']>>) {
+    let birthdayChanged = false
     await db.transaction('rw', [db.tasks, db.notes, db.birthdays, db.taskNoteLinks, db.settings, db.habits, db.habitChecks, db.syncMeta], async () => {
       for (const entityType of entityTypes) {
         for (const remote of pulled[entityType] as SyncRecord[]) {
@@ -83,10 +85,13 @@ export class SyncEngine {
           if (!local || isNewer(remote, local)) {
             await table.put(remote)
             await db.syncMeta.put({ entityType, entityId: remote.id, lastSyncedLocalUpdatedAt: remote.updatedAt })
+            if (entityType === 'birthdays') birthdayChanged = true
+            if (entityType === 'settings') birthdayChanged = true
           }
         }
       }
     })
+    if (birthdayChanged) notifyBirthdayNotificationDataChanged()
   }
 
   private async markPushed(changes: SyncChanges) {

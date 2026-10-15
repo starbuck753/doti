@@ -1,8 +1,9 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { AccentColor, Language, Settings, Theme } from '../../domain/models'
+import type { AccentColor, BirthdayNotificationSettings, Language, Settings, Theme } from '../../domain/models'
 import { db, defaultSettings } from '../../data/db'
 import { notifyLocalChange } from '../../sync/signals'
+import { BIRTHDAY_NOTIFICATION_CHANGE_EVENT, normalizeBirthdayNotificationSettings, notifyBirthdayNotificationDataChanged } from '../../notifications/birthdayNotificationScheduler'
 
 interface AppSettingsContextValue {
   language: Language
@@ -11,12 +12,14 @@ interface AppSettingsContextValue {
   priorityAgingEnabled: boolean
   priorityAgingIntervalDays: number
   showHabitsOnDashboard: boolean
+  birthdayNotifications: BirthdayNotificationSettings
   setLanguage: (language: Language) => void
   setTheme: (theme: Theme) => void
   setAccentColor: (accentColor: AccentColor) => void
   setPriorityAgingEnabled: (enabled: boolean) => void
   setPriorityAgingIntervalDays: (days: number) => void
   setShowHabitsOnDashboard: (show: boolean) => void
+  setBirthdayNotifications: (settings: BirthdayNotificationSettings) => void
 }
 
 const AppSettingsContext = createContext<AppSettingsContextValue | null>(null)
@@ -26,12 +29,16 @@ export function AppSettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<Settings>(defaultSettings)
 
   useEffect(() => {
-    void db.settings.get('app').then((stored) => {
+    const reloadStoredSettings = () => void db.settings.get('app').then((stored) => {
       const next = { ...defaultSettings, ...stored }
+      next.birthdayNotifications = normalizeBirthdayNotificationSettings(stored?.birthdayNotifications)
       setSettings(next)
-      if (!stored || stored.accentColor === undefined || stored.priorityAgingEnabled === undefined || stored.priorityAgingIntervalDays === undefined || stored.showHabitsOnDashboard === undefined) void db.settings.put(next)
+      if (!stored || stored.accentColor === undefined || stored.priorityAgingEnabled === undefined || stored.priorityAgingIntervalDays === undefined || stored.showHabitsOnDashboard === undefined || stored.birthdayNotifications === undefined) void db.settings.put(next)
       void i18n.changeLanguage(next.language)
     })
+    reloadStoredSettings()
+    window.addEventListener(BIRTHDAY_NOTIFICATION_CHANGE_EVENT, reloadStoredSettings)
+    return () => window.removeEventListener(BIRTHDAY_NOTIFICATION_CHANGE_EVENT, reloadStoredSettings)
   }, [i18n])
 
   useEffect(() => {
@@ -45,7 +52,7 @@ export function AppSettingsProvider({ children }: { children: ReactNode }) {
 
   const update = (patch: Partial<Settings>) => {
     const next = { ...settings, ...patch, updatedAt: new Date().toISOString() }
-    void db.settings.put(next).then(() => notifyLocalChange())
+    void db.settings.put(next).then(() => { notifyLocalChange(); if (patch.birthdayNotifications || patch.language) notifyBirthdayNotificationDataChanged() })
     setSettings(next)
   }
   const value = useMemo(() => ({
@@ -55,12 +62,14 @@ export function AppSettingsProvider({ children }: { children: ReactNode }) {
     priorityAgingEnabled: settings.priorityAgingEnabled,
     priorityAgingIntervalDays: settings.priorityAgingIntervalDays,
     showHabitsOnDashboard: settings.showHabitsOnDashboard,
+    birthdayNotifications: settings.birthdayNotifications,
     setLanguage: (language: Language) => { void i18n.changeLanguage(language); update({ language }) },
     setTheme: (theme: Theme) => update({ theme }),
     setAccentColor: (accentColor: AccentColor) => update({ accentColor }),
     setPriorityAgingEnabled: (priorityAgingEnabled: boolean) => update({ priorityAgingEnabled }),
     setPriorityAgingIntervalDays: (priorityAgingIntervalDays: number) => update({ priorityAgingIntervalDays }),
     setShowHabitsOnDashboard: (showHabitsOnDashboard: boolean) => update({ showHabitsOnDashboard }),
+    setBirthdayNotifications: (birthdayNotifications: BirthdayNotificationSettings) => update({ birthdayNotifications }),
   }), [settings, i18n])
 
   return <AppSettingsContext.Provider value={value}>{children}</AppSettingsContext.Provider>

@@ -81,5 +81,12 @@ export interface Settings {
   priorityAgingEnabled: boolean
   priorityAgingIntervalDays: number
   showHabitsOnDashboard: boolean
+  birthdayNotifications: BirthdayNotificationSettings
   updatedAt: string
+}
+
+export interface BirthdayNotificationSettings {
+  enabled: boolean
+  offsets: number[]
+  time: string
 }

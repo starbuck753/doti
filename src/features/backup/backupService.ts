@@ -1,6 +1,7 @@
 import { db, defaultSettings } from '../../data/db'
 import type { Birthday, Habit, HabitCheck, Note, Settings, Task, TaskNoteLink } from '../../domain/models'
 import { resetSyncMetadata } from '../../sync/localSyncState'
+import { notifyBirthdayNotificationDataChanged } from '../../notifications/birthdayNotificationScheduler'
 
 export const DotiBackupVersion = 1 as const
 const BACKUP_FORMAT = 'doti-backup' as const
@@ -50,7 +51,11 @@ function normalizeLink(value: unknown, exportedAt: string): TaskNoteLink {
 function normalizeSettings(value: unknown): Settings {
   if (!isRecord(value) || value.id !== 'app' || (value.language !== 'en' && value.language !== 'es') || !['system', 'light', 'dark'].includes(value.theme as string) || typeof value.priorityAgingEnabled !== 'boolean' || !requiredNumber(value, 'priorityAgingIntervalDays')) throw new BackupValidationError('Invalid settings record')
   const accentColor = ['blue', 'purple', 'pink', 'green', 'orange', 'teal'].includes(value.accentColor as string) ? value.accentColor : defaultSettings.accentColor
-  return { id: 'app', language: value.language as Settings['language'], theme: value.theme as Settings['theme'], accentColor: accentColor as Settings['accentColor'], priorityAgingEnabled: value.priorityAgingEnabled, priorityAgingIntervalDays: value.priorityAgingIntervalDays as number, showHabitsOnDashboard: typeof value.showHabitsOnDashboard === 'boolean' ? value.showHabitsOnDashboard : true, updatedAt: typeof value.updatedAt === 'string' ? value.updatedAt : new Date().toISOString() }
+  const rawNotifications = isRecord(value.birthdayNotifications) ? value.birthdayNotifications : {}
+  const offsets = Array.isArray(rawNotifications.offsets) ? [...new Set(rawNotifications.offsets.filter((offset): offset is number => typeof offset === 'number' && [0, 1, 7].includes(offset)))] : [0]
+  const time = typeof rawNotifications.time === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(rawNotifications.time) ? rawNotifications.time : '09:00'
+  const birthdayNotifications: Settings['birthdayNotifications'] = { enabled: typeof rawNotifications.enabled === 'boolean' ? rawNotifications.enabled : true, offsets, time }
+  return { id: 'app', language: value.language as Settings['language'], theme: value.theme as Settings['theme'], accentColor: accentColor as Settings['accentColor'], priorityAgingEnabled: value.priorityAgingEnabled, priorityAgingIntervalDays: value.priorityAgingIntervalDays as number, showHabitsOnDashboard: typeof value.showHabitsOnDashboard === 'boolean' ? value.showHabitsOnDashboard : true, birthdayNotifications, updatedAt: typeof value.updatedAt === 'string' ? value.updatedAt : new Date().toISOString() }
 }
 
 const habitIcons = ['circle-checked-big', 'circle-check-big', 'circle', 'sparkles', 'sun', 'leaf', 'plant-pot', 'paw-print', 'footprints', 'dumbbell', 'biceps-flexed', 'heart', 'brain', 'bed', 'glass-water', 'coffee', 'apple', 'carrot', 'popcorn', 'shopping-cart', 'book-open-text', 'book', 'activity', 'gamepad2', 'music', 'mail', 'notebook-pen', 'credit-card', 'moon', 'pencil']
@@ -120,6 +125,7 @@ export async function restoreBackup(backup: DotiBackupV1) {
     await db.settings.add(backup.data.settings)
   })
   await resetSyncMetadata()
+  notifyBirthdayNotificationDataChanged()
 }
 
 export async function readBackupFile(file: File) {
