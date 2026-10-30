@@ -1,11 +1,16 @@
 {
   "name": "doti",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build && node scripts/copy-404.mjs",
+    "build:android": "tsc -b && vite build --mode android",
+    "android:sync": "npm run build:android && cap sync android",
+    "android:debug": "node scripts/android-release.mjs debug",
+    "android:release": "node scripts/android-release.mjs release",
+    "android:verify": "node scripts/android-verify.mjs",
     "test": "node --experimental-strip-types --experimental-loader ./tests/typescript-resolver.mjs --test tests/habits.test.ts tests/birthdayNotifications.test.ts",
     "test:habits": "node --experimental-strip-types --test tests/habits.test.ts",
     "preview": "vite preview"

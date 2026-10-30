@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import type { Habit, HabitCheck } from '../src/domain/models.ts'
-import { getCurrentWeekDates, getHabitDayState, getHabitsForDate, getLocalDateKey, isHabitCompletedForDate, isHabitScheduledForDate } from '../src/features/habits/habitUtils.ts'
+import { getCurrentWeekDates, getHabitDayState, getHabitsForDate, getLastSevenDates, getLocalDateKey, isHabitCompletedForDate, isHabitScheduledForDate } from '../src/features/habits/habitUtils.ts'
 
 const habit = (overrides: Partial<Habit> = {}): Habit => ({ id: 'h1', name: 'Read', icon: 'circle', color: 'neutral', frequency: 'daily', weekdays: [], createdAt: '2026-10-01T15:00:00.000Z', updatedAt: '2026-10-01T15:00:00.000Z', deletedAt: null, ...overrides })
 
@@ -39,6 +39,11 @@ test('current week runs Monday through Sunday and contains the local date', () =
   const week = getCurrentWeekDates(new Date(2026, 9, 7, 12))
   assert.deepEqual(week.map(getLocalDateKey), ['2026-10-05', '2026-10-06', '2026-10-07', '2026-10-08', '2026-10-09', '2026-10-10', '2026-10-11'])
   assert.equal(week.some((date) => getLocalDateKey(date) === '2026-10-07'), true)
+})
+
+test('last seven dates are a rolling range ending today', () => {
+  const days = getLastSevenDates(new Date(2026, 9, 7, 12))
+  assert.deepEqual(days.map(getLocalDateKey), ['2026-10-01', '2026-10-02', '2026-10-03', '2026-10-04', '2026-10-05', '2026-10-06', '2026-10-07'])
 })
 
 test('weekly state distinguishes completion, missed, unscheduled, future, and before creation', () => {

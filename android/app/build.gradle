@@ -1,5 +1,13 @@
 apply plugin: 'com.android.application'
 
+def packageJson = new groovy.json.JsonSlurper().parse(rootProject.file('../package.json'))
+def versionCodeValue = (project.findProperty('DOTI_VERSION_CODE') ?: '1').toInteger()
+def signingPropertiesFile = rootProject.file('keystore.properties')
+def signingProperties = new Properties()
+if (signingPropertiesFile.exists()) {
+    signingPropertiesFile.withInputStream { signingProperties.load(it) }
+}
+
 android {
     namespace = "com.doti.app"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -7,8 +15,8 @@ android {
         applicationId "com.doti.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode versionCodeValue
+        versionName packageJson.version
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -16,11 +24,37 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            if (signingPropertiesFile.exists()) {
+                storeFile rootProject.file(signingProperties.getProperty('storeFile', ''))
+                storePassword signingProperties.getProperty('storePassword', '')
+                keyAlias signingProperties.getProperty('keyAlias', '')
+                keyPassword signingProperties.getProperty('keyPassword', '')
+                storeType signingProperties.getProperty('storeType', 'PKCS12')
+            }
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (signingPropertiesFile.exists()) {
+                signingConfig signingConfigs.release
+            }
         }
+    }
+}
+
+if (gradle.startParameter.taskNames.any { it.toLowerCase().contains('release') }) {
+    def required = ['storeFile', 'storePassword', 'keyAlias', 'keyPassword']
+    def missing = required.findAll { !signingProperties.getProperty(it)?.trim() }
+    def keyPath = signingProperties.getProperty('storeFile')
+    def missingStore = !keyPath || !rootProject.file(keyPath).isFile()
+    if (!signingPropertiesFile.exists() || !missing.isEmpty() || missingStore) {
+        def problems = missing.findAll { it != 'storeFile' }
+        if (missingStore) problems << 'storeFile (missing or not found)'
+        throw new GradleException("Release signing is not configured. Create android/keystore.properties from android/keystore.properties.example and configure a valid, private keystore. Missing or invalid: ${problems.join(', ')}")
     }
 }
 

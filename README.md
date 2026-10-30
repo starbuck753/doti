@@ -253,6 +253,64 @@ build and deployment. The site is served at:
 
 `https://starbuck753.github.io/doti/`
 
+## Android Release Builds
+
+Release APKs are built locally and include the web assets bundled into the APK. GitHub Pages and its PWA build remain separate.
+
+### Required tools and configuration
+
+- Node.js 22 (matching the GitHub Pages build), npm, Android SDK Platform 36 and Android SDK Build-Tools (including `apksigner` and `aapt`).
+- Use JDK 21. The existing Android Gradle Plugin is 8.13.0, Gradle wrapper is 8.14.3, and Capacitor Android is 8.5.3. This supported combination works with JDK 21; Java 25 is not compatible with this Gradle build. Keep these existing versions unless a compatibility change is deliberately planned.
+- Install Android SDK Platform 36 and Android SDK Build-Tools with `apksigner` and `aapt`. Android Studio's SDK Manager can install these components.
+- Set `VITE_SUPABASE_URL` and the public `VITE_SUPABASE_ANON_KEY` in `.env` or the process environment. The release command validates that both are present and does not print their values. Never use a service-role or other privileged key; Vite embeds these public values in web assets inside the APK.
+
+### Select Java once for this project
+
+The Android scripts read `DOTI_JDK_HOME` from an ignored, project-local `.android-build.env` file before considering `JAVA_HOME`. Set it to the JDK 21 installation directory (the directory containing `bin/java.exe`), for example:
+
+```text
+DOTI_JDK_HOME=C:/path/to/your/jdk-21
+```
+
+Use forward slashes in this file on Windows. Builds set `JAVA_HOME` and put that JDK first on the child process `PATH`, so the system Java selection does not affect Doti. The preflight checks Java 21, Android SDK Platform 36, and required Build-Tools before Gradle starts. The file is ignored by Git and must not contain signing or Supabase credentials. Android Studio uses its own Gradle JDK setting: choose the same JDK 21 in **Settings → Build, Execution, Deployment → Build Tools → Gradle** for IDE syncs. No system-wide environment change is required.
+
+If a build reports that Java 25 was detected, set `DOTI_JDK_HOME` in `.android-build.env` to a JDK 21 installation and retry; do not change the machine-wide `JAVA_HOME` for every build. If the SDK is installed outside the usual location, set `ANDROID_SDK_ROOT` or configure `sdk.dir` in the ignored `android/local.properties` file. `JAVA_HOME` is used only as a fallback when the project-local setting is absent.
+
+### Create and protect the permanent signing key
+
+Generate the key once, choosing and securely storing your own passwords. From PowerShell in the project directory:
+
+```powershell
+keytool -genkeypair -v -keystore android/doti-release.keystore -storetype PKCS12 -keyalg RSA -keysize 3072 -validity 10000 -alias doti-release
+Copy-Item android/keystore.properties.example android/keystore.properties
+```
+
+`keytool` prompts for passwords and certificate details. Never put passwords on the command line. Edit the ignored `android/keystore.properties` with those same values and keep the keystore and a secure backup in separate protected locations. Losing the key or changing it prevents future APKs from updating installs signed with the original key. Do not commit either file; `.gitignore` excludes them.
+
+### Build, verify, and install
+
+```powershell
+npm run android:debug
+npm run android:release
+npm run android:verify
+```
+
+Both build commands validate the environment, build Android web assets, synchronize Capacitor, and run Gradle. Release also requires the existing private signing configuration and Supabase public build variables. Verification checks the APK signature against the configured release keystore, application ID, versionName, and DOTI_VERSION_CODE. Debug output: `android/app/build/outputs/apk/debug/app-debug.apk`. Release output: `android/app/build/outputs/apk/release/app-release.apk`. `npm run build` remains the regular web/PWA workflow.
+
+To install manually, copy the APK to the Android device and open it to install. With a device connected and authorized for ADB:
+
+```powershell
+adb install -r android/app/build/outputs/apk/release/app-release.apk
+```
+
+Do not install the first Release APK over the currently installed Debug APK: Android rejects the different signing certificate. Before migrating, use **Supabase → Sync Now**, export a JSON backup, and verify that the backup is safely stored outside Doti. Then uninstall the Debug app (which may delete its local IndexedDB data), install the signed Release APK, sign in to Supabase, sync, and verify data, notification permission, and birthday reminders. Restore the backup only if needed. Do not uninstall for normal Release-to-Release updates.
+
+### Versioning and future updates
+
+`package.json` is the source of the user-visible Android `versionName`; bump it when preparing a release. Increment `DOTI_VERSION_CODE` in `android/gradle.properties` for every APK release (currently `1`). Android requires every update's versionCode to be greater than the installed one. Then run `npm run android:release` and install the new APK over the existing Release app. Keep `com.doti.app`, the permanent signing key, Capacitor's bundled local origin, and compatible IndexedDB schema migrations stable. Normal app updates preserve app storage and Supabase's existing browser storage where Android retains it; this build process does not clear WebView data. Birthday schedules continue through the existing notification reconciliation on app launch/foreground and data changes.
+
+The Android project remains openable in Android Studio. APKs, Android build outputs, local SDK settings, signing configuration, and keystores are ignored by Git; the Android source project is not.
+
 To run Doti locally:
 
 ```sh
