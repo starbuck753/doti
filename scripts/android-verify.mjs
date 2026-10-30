@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
@@ -17,7 +17,8 @@ function findTool(name) {
     if (!existsSync(dir)) continue;
     const versions = readdirSync(dir, { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => entry.name).sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
     for (const version of versions) {
-      const tool = join(dir, version, process.platform === 'win32' ? `${name}.exe` : name);
+      const executable = process.platform !== 'win32' ? name : name === 'apksigner' ? 'apksigner.bat' : `${name}.exe`;
+      const tool = join(dir, version, executable);
       if (existsSync(tool)) return tool;
     }
   }
@@ -30,7 +31,10 @@ const apksigner = findTool('apksigner');
 const aapt = findTool('aapt');
 if (!apksigner || !aapt) throw new Error('Android SDK build-tools apksigner and aapt are required to verify the APK.');
 
-const signature = spawnSync(apksigner, ['verify', '--verbose', '--print-certs', apk], { encoding: 'utf8' });
+const java = resolve(process.env.JAVA_HOME ?? '', 'bin', process.platform === 'win32' ? 'java.exe' : 'java');
+const apksignerJar = resolve(dirname(apksigner), 'lib', 'apksigner.jar');
+if (!existsSync(java) || !existsSync(apksignerJar)) throw new Error('JDK java and SDK apksigner.jar are required to verify the release APK.');
+const signature = spawnSync(java, ['-jar', apksignerJar, 'verify', '--verbose', '--print-certs', apk], { encoding: 'utf8' });
 if (signature.status !== 0) throw new Error(`APK signature verification failed: ${signature.stderr}`);
 const signingPath = resolve(root, 'android/keystore.properties');
 if (!existsSync(signingPath)) throw new Error('Release signing configuration is missing; cannot confirm the configured signing identity.');

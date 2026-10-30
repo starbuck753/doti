@@ -12,10 +12,12 @@ function fail(message) {
 }
 
 function run(command, args, options = {}) {
-  const result = spawnSync(command, args, {
+  const isWindowsScript = process.platform === 'win32' && /\.(bat|cmd)$/i.test(command);
+  const executable = isWindowsScript ? (process.env.ComSpec || 'cmd.exe') : command;
+  const commandArgs = isWindowsScript ? ['/d', '/c', command, ...args] : args;
+  const result = spawnSync(executable, commandArgs, {
     cwd: options.cwd ?? root,
     stdio: 'inherit',
-    shell: process.platform === 'win32' && /\.(bat|cmd)$/i.test(command),
     env: process.env,
   });
   if (result.error) fail(`could not start ${command}: ${result.error.message}`);
@@ -49,13 +51,13 @@ function preflight() {
   const requestedHome = process.env.DOTI_JDK_HOME || config.DOTI_JDK_HOME;
   const javaHome = requestedHome || process.env.JAVA_HOME;
   if (!javaHome || !existsSync(resolve(javaHome, 'bin', process.platform === 'win32' ? 'java.exe' : 'java'))) {
-    fail('JDK not found. Install JDK 21 and set DOTI_JDK_HOME in .android-build.env (or JAVA_HOME).');
+    fail('JDK not found. Set DOTI_JDK_HOME in .android-build.env or configure JAVA_HOME with JDK 21 or 25.');
   }
   const java = resolve(javaHome, 'bin', process.platform === 'win32' ? 'java.exe' : 'java');
   const version = spawnSync(java, ['-version'], { encoding: 'utf8' });
   const versionText = `${version.stdout || ''}\n${version.stderr || ''}`;
   const major = Number(versionText.match(/version "(?:1\.)?(\d+)/)?.[1]);
-  if (version.status !== 0 || major !== 21) fail(`Doti Android builds require JDK 21. Detected Java ${major || 'unknown'} at the selected JDK path.`);
+  if (version.status !== 0 || ![21, 25].includes(major)) fail(`Doti Android builds require JDK 21 or 25. Detected Java ${major || 'unknown'} at the selected JDK path.`);
   process.env.JAVA_HOME = resolve(javaHome);
   process.env.PATH = `${resolve(javaHome, 'bin')}${process.platform === 'win32' ? ';' : ':'}${process.env.PATH || ''}`;
 
@@ -65,7 +67,9 @@ function preflight() {
   if (!existsSync(sdk)) fail(`Android SDK was not found at ${sdk}. Set ANDROID_SDK_ROOT or configure android/local.properties.`);
   if (!existsSync(resolve(sdk, 'platforms', 'android-36'))) fail(`Android SDK Platform 36 not found. Configure ANDROID_SDK_ROOT or android/local.properties (checked ${sdk}).`);
   const buildTools = resolve(sdk, 'build-tools');
-  if (!existsSync(buildTools) || !readdirSync(buildTools, { withFileTypes: true }).some((entry) => entry.isDirectory() && ['apksigner', 'aapt'].every((tool) => existsSync(resolve(buildTools, entry.name, `${tool}${process.platform === 'win32' ? '.exe' : ''}`))))) {
+  const hasRequiredTools = (version) => existsSync(resolve(buildTools, version, process.platform === 'win32' ? 'aapt.exe' : 'aapt'))
+    && existsSync(resolve(buildTools, version, process.platform === 'win32' ? 'apksigner.bat' : 'apksigner'));
+  if (!existsSync(buildTools) || !readdirSync(buildTools, { withFileTypes: true }).some((entry) => entry.isDirectory() && hasRequiredTools(entry.name))) {
     fail('Android SDK Build-Tools with apksigner and aapt are required. Install them with SDK Manager.');
   }
   process.env.ANDROID_SDK_ROOT ||= sdk;

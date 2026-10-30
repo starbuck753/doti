@@ -260,21 +260,21 @@ Release APKs are built locally and include the web assets bundled into the APK. 
 ### Required tools and configuration
 
 - Node.js 22 (matching the GitHub Pages build), npm, Android SDK Platform 36 and Android SDK Build-Tools (including `apksigner` and `aapt`).
-- Use JDK 21. The existing Android Gradle Plugin is 8.13.0, Gradle wrapper is 8.14.3, and Capacitor Android is 8.5.3. This supported combination works with JDK 21; Java 25 is not compatible with this Gradle build. Keep these existing versions unless a compatibility change is deliberately planned.
+- Use JDK 25 to run the wrapper (or JDK 21). The Android Gradle Plugin remains 8.13.0 and Capacitor Android remains 8.5.3; the wrapper uses Gradle 9.1.0, which supports Java 25 and requires AGP 8.4 or newer. Capacitor's Android modules compile with Java 21; Gradle provisions that compiler toolchain into its own cache on first build, so no system JDK 21 installation is needed.
 - Install Android SDK Platform 36 and Android SDK Build-Tools with `apksigner` and `aapt`. Android Studio's SDK Manager can install these components.
 - Set `VITE_SUPABASE_URL` and the public `VITE_SUPABASE_ANON_KEY` in `.env` or the process environment. The release command validates that both are present and does not print their values. Never use a service-role or other privileged key; Vite embeds these public values in web assets inside the APK.
 
 ### Select Java once for this project
 
-The Android scripts read `DOTI_JDK_HOME` from an ignored, project-local `.android-build.env` file before considering `JAVA_HOME`. Set it to the JDK 21 installation directory (the directory containing `bin/java.exe`), for example:
+The Android scripts read `DOTI_JDK_HOME` from an ignored, project-local `.android-build.env` file before considering `JAVA_HOME`. Set it to a JDK 21 or 25 installation directory (the directory containing `bin/java.exe`), for example:
 
 ```text
 DOTI_JDK_HOME=C:/path/to/your/jdk-21
 ```
 
-Use forward slashes in this file on Windows. Builds set `JAVA_HOME` and put that JDK first on the child process `PATH`, so the system Java selection does not affect Doti. The preflight checks Java 21, Android SDK Platform 36, and required Build-Tools before Gradle starts. The file is ignored by Git and must not contain signing or Supabase credentials. Android Studio uses its own Gradle JDK setting: choose the same JDK 21 in **Settings → Build, Execution, Deployment → Build Tools → Gradle** for IDE syncs. No system-wide environment change is required.
+Use forward slashes in this file on Windows. Builds set `JAVA_HOME` and put that JDK first on the child process `PATH`, so the system Java selection does not affect Doti. The preflight checks Java 21 or 25, Android SDK Platform 36, and required Build-Tools before Gradle starts. The Foojay resolver downloads the Java 21 compiler toolchain to Gradle's cache on first use. The file is ignored by Git and must not contain signing or Supabase credentials. Android Studio uses its own Gradle JDK setting: choose the same JDK in **Settings → Build, Execution, Deployment → Build Tools → Gradle** for IDE syncs. No system-wide environment change is required.
 
-If a build reports that Java 25 was detected, set `DOTI_JDK_HOME` in `.android-build.env` to a JDK 21 installation and retry; do not change the machine-wide `JAVA_HOME` for every build. If the SDK is installed outside the usual location, set `ANDROID_SDK_ROOT` or configure `sdk.dir` in the ignored `android/local.properties` file. `JAVA_HOME` is used only as a fallback when the project-local setting is absent.
+If a build reports an unsupported Gradle runtime Java version, set `DOTI_JDK_HOME` in `.android-build.env` to JDK 21 or 25; do not change the machine-wide `JAVA_HOME` for every build. If automatic Java 21 toolchain provisioning fails, check network access to Foojay/Adoptium and Gradle repositories. If the SDK is installed outside the usual location, set `ANDROID_SDK_ROOT` or configure `sdk.dir` in the ignored `android/local.properties` file. `JAVA_HOME` is used only as a fallback when the project-local setting is absent.
 
 ### Create and protect the permanent signing key
 
