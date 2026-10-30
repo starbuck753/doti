@@ -25,6 +25,10 @@ export function getCurrentWeekDates(today = new Date()) {
   return Array.from({ length: 7 }, (_, index) => new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + index))
 }
 
+export function getLastSevenDates(today = new Date()) {
+  return Array.from({ length: 7 }, (_, index) => new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6 + index))
+}
+
 export function getHabitDayState(habit: Habit, checks: HabitCheck[], date: Date, today = new Date()): HabitDayState {
   if (getLocalDateKey(date) < getLocalDateKey(new Date(habit.createdAt))) return 'before-created'
   if (getLocalDateKey(date) > getLocalDateKey(today)) return 'future'

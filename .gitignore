@@ -2,6 +2,8 @@ node_modules/
 /dist/
 
 .gradle-user-home/
+.android-user/
+.android-build.env
 android/.gradle/
 android/.kotlin/
 android/**/build/
@@ -11,6 +13,17 @@ android/app/src/main/assets/capacitor.config.json
 android/app/src/main/assets/capacitor.plugins.json
 android/app/src/main/res/xml/config.xml
 
+android-pre-scaffold-backup/
+
 .env
 .env.*
 !.env.example
+
+# Local Android release credentials and generated packages
+android/keystore.properties
+android/*.keystore
+android/*.jks
+android/*.p12
+android/*.pfx
+android/**/*.apk
+android/**/*.aab

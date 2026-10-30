@@ -1,17 +1,24 @@
 {
   "name": "doti",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build && node scripts/copy-404.mjs",
+    "build:android": "tsc -b && vite build --mode android",
+    "android:sync": "npm run build:android && cap sync android",
+    "android:debug": "node scripts/android-release.mjs debug",
+    "android:release": "node scripts/android-release.mjs release",
+    "android:verify": "node scripts/android-verify.mjs",
     "test": "node --experimental-strip-types --experimental-loader ./tests/typescript-resolver.mjs --test tests/habits.test.ts tests/birthdayNotifications.test.ts",
     "test:habits": "node --experimental-strip-types --test tests/habits.test.ts",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.3",
     "@capacitor/app-launcher": "^8.0.1",
+    "@capacitor/cli": "^8.5.3",
     "@capacitor/core": "^8.5.3",
     "@capacitor/local-notifications": "^8.3.1",
     "@supabase/supabase-js": "^2.117.2",

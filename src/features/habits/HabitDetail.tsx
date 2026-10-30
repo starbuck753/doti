@@ -4,23 +4,29 @@ import { useTranslation } from 'react-i18next'
 import { Apple, Bed, BicepsFlexed, BookOpenText, Brain, Carrot, ChevronLeft, Circle, CircleCheckBig, Coffee, CreditCard, Dumbbell, Footprints, Gamepad2, GlassWater, Heart, Leaf, Mail, Music, NotebookPen, PawPrint, PlantPot, Popcorn, ShoppingCart, Sparkles, Sun, Trash2 } from 'lucide-react'
 import type { Habit, HabitColor, HabitIcon } from '../../domain/models'
 import { habitRepository } from './habitRepository'
-import { getLocalDateKey, isHabitCompletedForDate } from './habitUtils'
+import { getHabitDayState, getLastSevenDates, getLocalDateKey, isHabitCompletedForDate } from './habitUtils'
 
 const icons = { 'circle-checked-big': CircleCheckBig, sparkles: Sparkles, sun: Sun, leaf: Leaf, 'plant-pot': PlantPot, 'paw-print': PawPrint, footprints: Footprints, dumbbell: Dumbbell, 'biceps-flexed': BicepsFlexed, heart: Heart, brain: Brain, bed: Bed, 'glass-water': GlassWater, coffee: Coffee, apple: Apple, carrot: Carrot, popcorn: Popcorn, 'shopping-cart': ShoppingCart, 'book-open-text': BookOpenText, gamepad2: Gamepad2, music: Music, mail: Mail, 'notebook-pen': NotebookPen, 'credit-card': CreditCard } satisfies Record<HabitIcon, typeof Circle>
 const colors: HabitColor[] = ['neutral', 'blue', 'purple', 'pink', 'green', 'orange', 'teal']
 
 export function HabitDetail() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { habitId } = useParams()
   const navigate = useNavigate()
   const [habit, setHabit] = useState<Habit | null>(null)
+  const [recentChecks, setRecentChecks] = useState<Awaited<ReturnType<typeof habitRepository.checksBetweenDates>>>([])
   const [name, setName] = useState('')
   const [loading, setLoading] = useState(true)
-  const [completed, setCompleted] = useState(false)
-  useEffect(() => { let alive = true; void (async () => { const value = habitId ? await habitRepository.get(habitId) : undefined; const checks = await habitRepository.checksForDate(); if (!alive) return; setHabit(value && !value.deletedAt ? value : null); setName(value?.name ?? ''); setCompleted(value ? isHabitCompletedForDate(checks, value.id, getLocalDateKey()) : false); setLoading(false) })(); return () => { alive = false } }, [habitId])
+  const recentDates = getLastSevenDates()
+  const recentStart = getLocalDateKey(recentDates[0])
+  const recentEnd = getLocalDateKey(recentDates[6])
+  const todayKey = getLocalDateKey()
+  const completed = habit ? isHabitCompletedForDate(recentChecks, habit.id, todayKey) : false
+  useEffect(() => { let alive = true; void (async () => { const dates = getLastSevenDates(); const [value, checks] = await Promise.all([habitId ? habitRepository.get(habitId) : undefined, habitRepository.checksBetweenDates(getLocalDateKey(dates[0]), getLocalDateKey(dates[6]))]); if (!alive) return; setHabit(value && !value.deletedAt ? value : null); setName(value?.name ?? ''); setRecentChecks(checks); setLoading(false) })(); return () => { alive = false } }, [habitId])
   const change = async (patch: Partial<Pick<Habit, 'icon' | 'color' | 'frequency' | 'weekdays'>>) => { if (!habit) return; const updated = await habitRepository.update(habit, patch); setHabit(updated) }
   const saveName = async () => { const value = name.trim(); if (!habit) return; if (!value) { setName(habit.name); return }; if (value !== habit.name) setHabit(await habitRepository.update(habit, { name: value })) }
-  const toggleToday = async () => { if (!habit) return; await habitRepository.toggle(habit.id); const checks = await habitRepository.checksForDate(); setCompleted(isHabitCompletedForDate(checks, habit.id, getLocalDateKey())) }
+  const toggleDate = async (date: Date) => { if (!habit) return; await habitRepository.toggle(habit.id, getLocalDateKey(date)); setRecentChecks(await habitRepository.checksBetweenDates(recentStart, recentEnd)) }
+  const toggleToday = async () => toggleDate(new Date())
   const remove = async () => { if (habit && window.confirm(t('habits.confirmDelete'))) { await habitRepository.delete(habit); navigate('/habits') } }
   if (loading) return <section className="detail-page"><p className="muted-text">{t('habits.loading')}</p></section>
   if (!habit) return <section className="detail-page not-found"><button className="back-link" onClick={() => navigate('/habits')}><ChevronLeft aria-hidden="true" />{t('habits.title')}</button><h1>{t('habits.notFound')}</h1></section>
@@ -34,6 +40,22 @@ export function HabitDetail() {
       {habit.frequency === 'weekdays' && <div className="habit-weekdays" role="group" aria-label={t('habits.selectedDays')}>{(t('habits.weekdays', { returnObjects: true }) as string[]).map((label, day) => { const weekday = (day + 1) % 7; const selected = habit.weekdays.includes(weekday); return <button key={weekday} type="button" aria-label={label} aria-pressed={selected} className={selected ? 'selected' : ''} onClick={() => { const next = selected ? habit.weekdays.filter((value) => value !== weekday) : [...habit.weekdays, weekday]; if (next.length) void change({ weekdays: next }) }}>{label}</button> })}</div>}
     </div>
     <div className="habit-today-state"><span>{t('habits.today')}</span><button type="button" aria-pressed={completed} onClick={() => void toggleToday()}>{completed ? `✓ ${t('habits.completed')}` : t('habits.markDone')}</button></div>
+    <section className="habit-detail-group" aria-labelledby="habit-history-title">
+      <h2 id="habit-history-title">{t('habitHistory.title')}</h2>
+      <div className="habit-history-grid" role="group" aria-label={t('habitHistory.title')}>
+        {recentDates.map((date) => {
+          const dateKey = getLocalDateKey(date)
+          const isCompleted = isHabitCompletedForDate(recentChecks, habit.id, dateKey)
+          const state = getHabitDayState(habit, recentChecks, date)
+          const dayName = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'][(date.getDay() + 6) % 7]
+          const stateLabel = t(`habits.states.${state}`, { name: habit.name, day: date.toLocaleDateString(i18n.language, { weekday: 'long', month: 'long', day: 'numeric' }) })
+          const StateIcon = isCompleted ? CircleCheckBig : Circle
+          return <button key={dateKey} type="button" className={`habit-history-day ${isCompleted ? 'is-completed' : ''}`} aria-label={stateLabel} aria-pressed={isCompleted} disabled={state === 'not-scheduled' || state === 'before-created'} onClick={() => void toggleDate(date)}>
+            <span>{t(`habits.dayNames.${dayName}`).slice(0, 2)}</span><span className="habit-history-date">{date.getDate()}</span><StateIcon aria-hidden="true" />
+          </button>
+        })}
+      </div>
+    </section>
     <button className="delete-task" onClick={() => void remove()}><Trash2 aria-hidden="true" />{t('habits.delete')}</button>
   </section>
 }
