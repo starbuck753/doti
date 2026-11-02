@@ -343,8 +343,28 @@ keeping the same local-first architecture.
 
 ### Android
 
-The Capacitor Android app supports local Birthday notifications. Task
-reminders and home-screen widgets remain future ideas.
+The Capacitor Android app supports local Birthday notifications and an
+Upcoming Birthdays home-screen widget. The widget uses a small Capacitor
+Widget Data Bridge to copy active Birthday IDs, names, and month/day from
+Dexie into app-private Android SharedPreferences. Dexie remains authoritative;
+the native snapshot is a read-only, offline projection with no cloud credentials.
+
+The bridge reconciles on app startup/foreground, local Birthday changes,
+backup restore, and remote changes applied by the SyncEngine. Android refreshes
+all instances after snapshot writes, date/time/time-zone changes, reboot, app
+updates, and resizing, and schedules one inexact refresh shortly after local
+midnight. Proximity is calculated natively from the current local date, including
+Doti's February 29 → February 28 non-leap-year rule. The widget follows system
+light/dark mode when Doti's theme is set to System and uses Doti's stored English
+or Spanish language preference.
+
+The single responsive App Widget adapts its rows to available height: compact
+shows the next Birthday, medium shows up to three, and expanded shows up to
+five. Add it by long-pressing an Android home screen, opening **Widgets**, and
+choosing **Doti → Upcoming Birthdays**. Launchers determine the exact grid size
+and may limit resize behavior; no physical-device launcher validation has been
+performed. Future Tasks and Habits widgets can reuse the bridge without adding
+native write-back in this phase.
 
 ## Product Philosophy
 

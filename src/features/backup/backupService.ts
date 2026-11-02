@@ -2,6 +2,7 @@ import { db, defaultSettings } from '../../data/db'
 import type { Birthday, Habit, HabitCheck, Note, Settings, Task, TaskNoteLink } from '../../domain/models'
 import { resetSyncMetadata } from '../../sync/localSyncState'
 import { notifyBirthdayNotificationDataChanged } from '../../notifications/birthdayNotificationScheduler'
+import { notifyWidgetDataChanged } from '../birthdays/birthdayWidgetBridge'
 
 export const DotiBackupVersion = 1 as const
 const BACKUP_FORMAT = 'doti-backup' as const
@@ -126,6 +127,7 @@ export async function restoreBackup(backup: DotiBackupV1) {
   })
   await resetSyncMetadata()
   notifyBirthdayNotificationDataChanged()
+  notifyWidgetDataChanged()
 }
 
 export async function readBackupFile(file: File) {

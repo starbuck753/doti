@@ -1,0 +1,4 @@
+<resources>
+    <color name="widget_surface_dark">#29272D</color><color name="widget_text_dark">#F7F4F8</color><color name="widget_muted_dark">#C4BEC8</color>
+    <color name="widget_today_dark">#57394A</color><color name="widget_soon_dark">#51472A</color><color name="widget_neutral_dark">#403D45</color>
+</resources>

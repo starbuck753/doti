@@ -11,7 +11,7 @@
     "android:debug": "node scripts/android-release.mjs debug",
     "android:release": "node scripts/android-release.mjs release",
     "android:verify": "node scripts/android-verify.mjs",
-    "test": "node --experimental-strip-types --experimental-loader ./tests/typescript-resolver.mjs --test tests/habits.test.ts tests/birthdayNotifications.test.ts",
+    "test": "node --experimental-strip-types --experimental-loader ./tests/typescript-resolver.mjs --test tests/habits.test.ts tests/birthdayNotifications.test.ts tests/birthdayWidget.test.ts",
     "test:habits": "node --experimental-strip-types --test tests/habits.test.ts",
     "preview": "vite preview"
   },
