@@ -14,6 +14,7 @@ import { HabitDetail } from '../features/habits/HabitDetail'
 import { HabitsPage } from '../features/habits/HabitsPage'
 import './app.css'
 import { BIRTHDAY_NOTIFICATION_TAP_EVENT, birthdayNotificationScheduler } from '../notifications/birthdayNotificationScheduler'
+import { consumeBirthdayWidgetRoute, startBirthdayWidgetSync } from '../features/birthdays/birthdayWidgetBridge'
 
 function BirthdayNotificationNavigation() {
   const navigate = useNavigate()
@@ -24,6 +25,20 @@ function BirthdayNotificationNavigation() {
     let active = true
     void birthdayNotificationScheduler.start().then((cleanup) => { if (active) stop = cleanup; else cleanup() })
     return () => { active = false; window.removeEventListener(BIRTHDAY_NOTIFICATION_TAP_EVENT, onTap); stop?.() }
+  }, [navigate])
+  return null
+}
+
+function BirthdayWidgetSynchronization() {
+  const navigate = useNavigate()
+  useEffect(() => {
+    const stop = startBirthdayWidgetSync()
+    let active = true
+    const consume = () => void consumeBirthdayWidgetRoute().then((route) => { if (active && route) navigate(route) })
+    consume()
+    document.addEventListener('visibilitychange', consume)
+    window.addEventListener('doti-widget-route', consume)
+    return () => { active = false; stop(); document.removeEventListener('visibilitychange', consume); window.removeEventListener('doti-widget-route', consume) }
   }, [navigate])
   return null
 }
@@ -51,6 +66,7 @@ function Layout() {
 
   return <div className="app-shell">
     <BirthdayNotificationNavigation />
+    <BirthdayWidgetSynchronization />
     <main className="page-content"><Outlet /></main>
     <nav className="bottom-nav" aria-label={t('navigation.tasks')}>
       {navigation.map(({ path, label, type }) => (

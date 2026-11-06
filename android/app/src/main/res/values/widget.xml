@@ -1,0 +1,10 @@
+<resources>
+    <color name="widget_surface">#FFFDFC</color><color name="widget_text">#29272D</color><color name="widget_muted">#716D76</color>
+    <color name="widget_today">#F6DFEB</color><color name="widget_soon">#F7EBC4</color><color name="widget_neutral">#F1EFF3</color>
+    <color name="widget_surface_dark">#29272D</color><color name="widget_text_dark">#F7F4F8</color><color name="widget_muted_dark">#C4BEC8</color>
+    <color name="widget_today_dark">#57394A</color><color name="widget_soon_dark">#51472A</color><color name="widget_neutral_dark">#403D45</color>
+    <style name="WidgetBirthdayRow"><item name="android:layout_width">match_parent</item><item name="android:layout_height">0dp</item><item name="android:layout_weight">1</item><item name="android:gravity">center_vertical</item><item name="android:orientation">horizontal</item><item name="android:paddingTop">2dp</item><item name="android:paddingBottom">2dp</item></style>
+    <style name="WidgetBirthdayName"><item name="android:layout_width">0dp</item><item name="android:layout_height">wrap_content</item><item name="android:layout_weight">1</item><item name="android:ellipsize">end</item><item name="android:maxLines">1</item><item name="android:textSize">14sp</item></style>
+    <style name="WidgetBirthdayDate"><item name="android:layout_width">wrap_content</item><item name="android:layout_height">wrap_content</item><item name="android:paddingStart">5dp</item><item name="android:textSize">12sp</item><item name="android:maxLines">1</item></style>
+    <style name="WidgetBirthdayDays"><item name="android:layout_width">wrap_content</item><item name="android:layout_height">wrap_content</item><item name="android:layout_marginStart">7dp</item><item name="android:paddingStart">7dp</item><item name="android:paddingEnd">7dp</item><item name="android:paddingTop">3dp</item><item name="android:paddingBottom">3dp</item><item name="android:textSize">11sp</item><item name="android:maxLines">1</item></style>
+</resources>

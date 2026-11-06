@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root" android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:padding="12dp" android:background="@drawable/widget_background">
+    <TextView android:id="@+id/widget_header" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="Upcoming Birthdays" android:textSize="13sp" android:textStyle="bold" android:paddingBottom="5dp" />
+    <TextView android:id="@+id/widget_empty" android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1" android:gravity="center_vertical" android:text="No birthdays yet" android:textSize="14sp" android:visibility="gone" />
+    <LinearLayout android:id="@+id/widget_row_0" style="@style/WidgetBirthdayRow"><TextView android:id="@+id/widget_name_0" style="@style/WidgetBirthdayName"/><TextView android:id="@+id/widget_date_0" style="@style/WidgetBirthdayDate"/><TextView android:id="@+id/widget_days_0" style="@style/WidgetBirthdayDays"/></LinearLayout>
+    <LinearLayout android:id="@+id/widget_row_1" style="@style/WidgetBirthdayRow"><TextView android:id="@+id/widget_name_1" style="@style/WidgetBirthdayName"/><TextView android:id="@+id/widget_date_1" style="@style/WidgetBirthdayDate"/><TextView android:id="@+id/widget_days_1" style="@style/WidgetBirthdayDays"/></LinearLayout>
+    <LinearLayout android:id="@+id/widget_row_2" style="@style/WidgetBirthdayRow"><TextView android:id="@+id/widget_name_2" style="@style/WidgetBirthdayName"/><TextView android:id="@+id/widget_date_2" style="@style/WidgetBirthdayDate"/><TextView android:id="@+id/widget_days_2" style="@style/WidgetBirthdayDays"/></LinearLayout>
+    <LinearLayout android:id="@+id/widget_row_3" style="@style/WidgetBirthdayRow"><TextView android:id="@+id/widget_name_3" style="@style/WidgetBirthdayName"/><TextView android:id="@+id/widget_date_3" style="@style/WidgetBirthdayDate"/><TextView android:id="@+id/widget_days_3" style="@style/WidgetBirthdayDays"/></LinearLayout>
+    <LinearLayout android:id="@+id/widget_row_4" style="@style/WidgetBirthdayRow"><TextView android:id="@+id/widget_name_4" style="@style/WidgetBirthdayName"/><TextView android:id="@+id/widget_date_4" style="@style/WidgetBirthdayDate"/><TextView android:id="@+id/widget_days_4" style="@style/WidgetBirthdayDays"/></LinearLayout>
+</LinearLayout>

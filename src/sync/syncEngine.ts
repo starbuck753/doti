@@ -3,6 +3,7 @@ import type { Birthday, Habit, HabitCheck, Note, Settings, Task, TaskNoteLink } 
 import { getSyncState, updateSyncState } from './localSyncState'
 import type { SyncChanges, SyncEntityType, SyncProvider, SyncRecord, SyncStatus } from './types'
 import { notifyBirthdayNotificationDataChanged } from '../notifications/birthdayNotificationScheduler'
+import { notifyWidgetDataChanged } from '../features/birthdays/birthdayWidgetBridge'
 
 // Habits must be applied before dependent HabitChecks.
 const entityTypes: SyncEntityType[] = ['tasks', 'notes', 'birthdays', 'taskNoteLinks', 'settings', 'habits', 'habitChecks']
@@ -91,7 +92,7 @@ export class SyncEngine {
         }
       }
     })
-    if (birthdayChanged) notifyBirthdayNotificationDataChanged()
+    if (birthdayChanged) { notifyBirthdayNotificationDataChanged(); notifyWidgetDataChanged() }
   }
 
   private async markPushed(changes: SyncChanges) {
